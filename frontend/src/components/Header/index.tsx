@@ -1,25 +1,22 @@
 import * as React from 'react';
-import { Link as HistoryLink } from 'react-router-dom'
+import { Link as HistoryLink } from 'react-router-dom';
 
-import styled from 'styled-components'
-import { useTokenBalanceTreatingWETHasETH } from '../../state/wallet/hooks'
+import styled from 'styled-components';
+import { useTokenBalanceTreatingWETHasETH } from '../../state/wallet/hooks';
 
-import Menu from '../Menu'
-import Row from '../Row'
-import Web3Status from '../Web3Status'
+import Menu from '../Menu';
+import Row from '../Row';
+import Web3Status from '../Web3Status';
 
-import { ChainId, WETH } from '@uniswap/sdk'
-import { isMobile } from 'react-device-detect'
-import { Text } from 'rebass'
-import { useActiveWeb3React } from '../../hooks'
-import { useDarkModeManager } from '../../state/user/hooks'
-import { YellowCard } from '../Card'
+import { ChainId, WETH } from '@uniswap/sdk';
+import { isMobile } from 'react-device-detect';
+import { Text } from 'rebass';
+import { useActiveWeb3React } from '../../hooks';
+import { useDarkModeManager } from '../../state/user/hooks';
+import { YellowCard } from '../Card';
 
-import Logo from '../../assets/svg/logo.svg'
-import LogoDark from '../../assets/svg/logo_white.svg'
-import Wordmark from '../../assets/svg/wordmark.svg'
-import WordmarkDark from '../../assets/svg/wordmark_white.svg'
-import { RowBetween } from '../Row'
+import Logo from '../../assets/svg/logopng.png';
+import { RowBetween } from '../Row';
 
 const HeaderFrame = styled.div`
   display: flex;
@@ -100,32 +97,6 @@ const UniIcon = styled(HistoryLink) <{ to: string }>`
   }
 `
 
-const VersionLabel = styled.span<{ isV2?: boolean }>`
-  padding: ${({ isV2 }) => (isV2 ? '0.15rem 0.5rem 0.16rem 0.45rem' : '0.15rem 0.5rem 0.16rem 0.35rem')};
-  border-radius: 14px;
-  background: ${({ theme, isV2 }) => (isV2 ? theme.primary1 : 'none')};
-  color: ${({ theme, isV2 }) => (isV2 ? theme.white : theme.primary1)};
-  font-size: 0.825rem;
-  font-weight: 400;
-  :hover {
-    user-select: ${({ isV2 }) => (isV2 ? 'none' : 'initial')};
-    background: ${({ theme, isV2 }) => (isV2 ? theme.primary1 : 'none')};
-    color: ${({ theme, isV2 }) => (isV2 ? theme.white : theme.primary3)};
-  }
-`
-
-const VersionToggle = styled.a`
-  border-radius: 16px;
-  border: 1px solid ${({ theme }) => theme.primary1};
-  color: ${({ theme }) => theme.primary1};
-  display: flex;
-  width: fit-content;
-  cursor: pointer;
-  text-decoration: none;
-  :hover {
-    text-decoration: none;
-  }
-`
 
 export default function Header() {
   const { account, chainId } = useActiveWeb3React()
@@ -150,28 +121,16 @@ export default function Header() {
         <HeaderElement>
           <Title>
             <UniIcon id="link" to="/">
-              <img src={isDark ? LogoDark : Logo} alt="logo" />
+              <img src={Logo} alt="logo" width={60} style={{ borderRadius: '100%' }} />
             </UniIcon>
             {!isMobile && (
               <TitleText>
-                <HistoryLink id="link" to="/">
-                  <img
-                    style={{ marginLeft: '4px', marginTop: '4px' }}
-                    src={isDark ? WordmarkDark : Wordmark}
-                    alt="logo"
-                  />
+                <HistoryLink id="link" to="/" style={{ textDecoration: 'none', marginLeft: '10px', color: isDark ? 'white' : 'black', fontSize: '20px', fontFamily: 'Lato' }}>
+                  SalsaSwap
                 </HistoryLink>
               </TitleText>
             )}
           </Title>
-          <TestnetWrapper style={{ pointerEvents: 'auto' }}>
-            {!isMobile && (
-              <VersionToggle target="_self" href="https://v1.uniswap.exchange">
-                <VersionLabel isV2={true}>V2</VersionLabel>
-                {/* <VersionLabel isV2={false}>V1</VersionLabel> */}
-              </VersionToggle>
-            )}
-          </TestnetWrapper>
         </HeaderElement>
         <HeaderElement>
           <TestnetWrapper>
@@ -192,7 +151,7 @@ export default function Header() {
             <Menu />
           </div>
         </HeaderElement>
-      </RowBetween>
-    </HeaderFrame>
+      </RowBetween >
+    </HeaderFrame >
   )
 }
