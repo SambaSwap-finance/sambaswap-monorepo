@@ -20,7 +20,7 @@ const MEDIA_WIDTHS = {
 
 const mediaWidthTemplates: { [width in keyof typeof MEDIA_WIDTHS]: typeof css } = Object.keys(MEDIA_WIDTHS).reduce(
   (accumulator, size) => {
-    ;(accumulator as any)[size] = (a: any, b: any, c: any) => css`
+    ; (accumulator as any)[size] = (a: any, b: any, c: any) => css`
       @media (max-width: ${(MEDIA_WIDTHS as any)[size]}px) {
         ${css(a, b, c)}
       }
@@ -30,59 +30,56 @@ const mediaWidthTemplates: { [width in keyof typeof MEDIA_WIDTHS]: typeof css } 
   {}
 ) as any
 
-const white = '#FFFFFF'
-const black = '#000000'
+// const white = '#FFFFFF'
+// const black = '#000000'
 
 export function colors(darkMode: boolean): Colors {
   return {
     // base
-    white,
-    black,
+    white: '#FFFBF1', // Soft white, evoking sun-bleached walls and sandy beaches
+    black: '#242F40', // Deep navy, reminiscent of the late evening skies
 
-    // text
-    text1: darkMode ? '#FFFFFF' : '#000000',
-    text2: darkMode ? '#C3C5CB' : '#565A69',
-    text3: darkMode ? '#6C7284' : '#888D9B',
-    text4: darkMode ? '#565A69' : '#C3C5CB',
-    text5: darkMode ? '#2C2F36' : '#EDEEF2',
+    // text - Bold and expressive, ensuring clarity and vibrancy
+    text1: darkMode ? '#F1E0C5' : '#333D4B', // Light ochre for dark, slate grey for light
+    text2: darkMode ? '#D0C2A5' : '#627C8C', // Warm beige for dark, coastal blue for light
+    text3: darkMode ? '#B8A88D' : '#8A9BA8', // Muted taupe for dark, soft sky blue for light
+    text4: darkMode ? '#627C8C' : '#D0C2A5', // Coastal blue for dark, warm beige for light
+    text5: darkMode ? '#4E6577' : '#ECE5DB', // Dusky blue for dark, light limestone for light
 
-    // backgrounds / greys
-    bg1: darkMode ? '#212429' : '#FFFFFF',
-    bg2: darkMode ? '#2C2F36' : '#F7F8FA',
-    bg3: darkMode ? '#40444F' : '#EDEEF2',
-    bg4: darkMode ? '#565A69' : '#CED0D9',
-    bg5: darkMode ? '#565A69' : '#888D9B',
+    // backgrounds / greys - Mimicking the textures and tones of natural materials
+    bg1: darkMode ? '#2A3648' : '#FFFBF1', // Midnight blue for dark, soft white for light
+    bg2: darkMode ? '#4E6577' : '#FFF6E0', // Dusky blue for dark, very pale yellow for light
+    bg3: darkMode ? '#3D5265' : '#EDE5D9', // Steel blue for dark, pale sand for light
+    bg4: darkMode ? '#333D4B' : '#DAD2C3', // Slate grey for dark, muted beige for light
+    bg5: darkMode ? '#293345' : '#CFC4B2', // Deep ocean blue for dark, warm grey for light
 
-    //specialty colors
-    modalBG: darkMode ? 'rgba(0,0,0,0.85)' : 'rgba(0,0,0,0.6)',
-    advancedBG: darkMode ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.6)',
+    //specialty colors - Adding layers of depth and intrigue
+    modalBG: darkMode ? 'rgba(36, 47, 64, 0.85)' : 'rgba(255, 174, 66, 0.6)', // Dark slate for dark, soft amber for light
+    advancedBG: darkMode ? 'rgba(52, 61, 72, 0.1)' : 'rgba(255, 251, 241, 0.6)', // Charcoal mist for dark, morning haze for light
 
-    //primary colors
-    primary1: darkMode ? '#2172E5' : '#ff007a',
-    primary2: darkMode ? '#3680E7' : '#FF8CC3',
-    primary3: darkMode ? '#4D8FEA' : '#FF99C9',
-    primary4: darkMode ? '#376bad70' : '#F6DDE8',
-    primary5: darkMode ? '#153d6f70' : '#FDEAF1',
+    //primary colors - Radiant and lively, drawing from Latin America's colorful landscapes and cities
+    primary1: darkMode ? '#F2994A' : '#DB504A', // Warm amber for dark, vivid coral for light
+    primary2: darkMode ? '#EB5757' : '#F2C14E', // Soft red for dark, golden yellow for light
+    primary3: darkMode ? '#F2C14E' : '#8CB369', // Golden yellow for dark, fresh green for light
+    primary4: darkMode ? '#BB9457' : '#6B9080', // Bronze for dark, sage green for light
+    primary5: darkMode ? '#A89B68' : '#A4C3B2', // Olive gold for dark, seafoam green for light
 
-    // color text
-    primaryText1: darkMode ? '#6da8ff' : '#ff007a',
+    // color text - Lively and legible, complementing the primary hues
+    primaryText1: darkMode ? '#fff' : '#DB504A', // Warm amber vs vivid coral
 
-    // secondary colors
-    secondary1: darkMode ? '#2172E5' : '#ff007a',
-    secondary2: darkMode ? '#17000b26' : '#F6DDE8',
-    secondary3: darkMode ? '#17000b26' : '#FDEAF1',
+    // secondary colors - Subtle yet spirited, enhancing the overall palette
+    secondary1: darkMode ? '#DB504A' : '#F2994A', // Vivid coral for dark, warm amber for light
+    secondary2: darkMode ? '#333D4B' : '#EB5757', // Slate grey for dark, soft red for light
+    secondary3: darkMode ? '#333D4B' : '#F2C14E', // Slate grey for dark, golden yellow for light
 
-    // other
-    red1: '#FF6871',
+    // other - Keeping functional colors vibrant and expressive
+    red1: '#EB5757',
     green1: '#27AE60',
-    yellow1: '#FFE270',
-    yellow2: '#F3841E'
-
-    // dont wanna forget these blue yet
-    // blue4: darkMode ? '#153d6f70' : '#C4D9F8',
-    // blue5: darkMode ? '#153d6f70' : '#EBF4FF',
+    yellow1: '#F2C14E',
+    yellow2: '#F2994A'
   }
 }
+
 
 export function theme(darkMode: boolean): DefaultTheme {
   return {
@@ -120,7 +117,7 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
   return <StyledComponentsThemeProvider theme={themeObject}>{children}</StyledComponentsThemeProvider>
 }
 
-const TextWrapper = styled(Text)<{ color: keyof Colors }>`
+const TextWrapper = styled(Text) <{ color: keyof Colors }>`
   color: ${({ color, theme }) => (theme as any)[color]};
 `
 

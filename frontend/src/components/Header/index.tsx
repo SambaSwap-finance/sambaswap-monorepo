@@ -93,7 +93,7 @@ const NetworkCard = styled(YellowCard)`
   padding: 8px 12px;
 `
 
-const UniIcon = styled(HistoryLink)<{ to: string }>`
+const UniIcon = styled(HistoryLink) <{ to: string }>`
   transition: transform 0.3s ease;
   :hover {
     transform: rotate(-5deg);
