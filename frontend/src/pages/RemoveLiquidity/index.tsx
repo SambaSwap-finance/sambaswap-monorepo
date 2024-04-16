@@ -85,6 +85,8 @@ export default function RemoveLiquidity({ match: { params } }: RouteComponentPro
   const [signatureData, setSignatureData] = useState<{ v: number; r: string; s: string; deadline: number }>(null)
   const [approval, approveCallback] = useApproveCallback(parsedAmounts[Field.LIQUIDITY], ROUTER_ADDRESS)
   async function onAttemptToApprove() {
+    approveCallback()
+    return;
     // try to gather a signature for permission
     const nonce = await pairContract.nonces(account)
     const deadlineForSignature: number = Math.ceil(Date.now() / 1000) + deadline
@@ -140,7 +142,7 @@ export default function RemoveLiquidity({ match: { params } }: RouteComponentPro
         // for all errors other than 4001 (EIP-1193 user rejected request), fall back to manual approve
         if (error?.code !== 4001) {
           approveCallback()
-        }
+        } 
       })
   }
 
@@ -351,15 +353,15 @@ export default function RemoveLiquidity({ match: { params } }: RouteComponentPro
         <RowBetween mt="1rem">
           <ButtonConfirmed
             onClick={onAttemptToApprove}
-            confirmed={approval === ApprovalState.APPROVED || signatureData !== null}
-            disabled={approval !== ApprovalState.NOT_APPROVED || signatureData !== null}
+            confirmed={approval === ApprovalState.APPROVED}
+            disabled={approval !== ApprovalState.NOT_APPROVED}
             mr="0.5rem"
             fontWeight={500}
             fontSize={20}
           >
             {approval === ApprovalState.PENDING ? (
               <Dots>Approving</Dots>
-            ) : approval === ApprovalState.APPROVED || signatureData !== null ? (
+            ) : approval === ApprovalState.APPROVED ? (
               'Approved'
             ) : (
               'Approve'
@@ -367,7 +369,7 @@ export default function RemoveLiquidity({ match: { params } }: RouteComponentPro
           </ButtonConfirmed>
 
           <ButtonPrimary
-            disabled={!(approval === ApprovalState.APPROVED || signatureData !== null)}
+            disabled={!(approval === ApprovalState.APPROVED)}
             onClick={onRemove}
             ml="0.5rem"
           >

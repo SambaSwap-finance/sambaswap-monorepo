@@ -36,49 +36,50 @@ const mediaWidthTemplates: { [width in keyof typeof MEDIA_WIDTHS]: typeof css } 
 export function colors(darkMode: boolean): Colors {
   return {
     // base
-    white: '#FFFBF1', // Soft white, evoking sun-bleached walls and sandy beaches
-    black: '#242F40', // Deep navy, reminiscent of the late evening skies
+    white: '#FEF9EF', // Warm white, reminiscent of sandy beaches
+    black: '#1F2329', // Deep, dark blue-black, like a tropical night
 
-    // text - Bold and expressive, ensuring clarity and vibrancy
-    text1: darkMode ? '#F1E0C5' : '#333D4B', // Light ochre for dark, slate grey for light
-    text2: darkMode ? '#D0C2A5' : '#627C8C', // Warm beige for dark, coastal blue for light
-    text3: darkMode ? '#B8A88D' : '#8A9BA8', // Muted taupe for dark, soft sky blue for light
-    text4: darkMode ? '#627C8C' : '#D0C2A5', // Coastal blue for dark, warm beige for light
-    text5: darkMode ? '#4E6577' : '#ECE5DB', // Dusky blue for dark, light limestone for light
+    // text - More vibrant, drawing from natural colors for readability
+    text1: darkMode ? '#FFF8E7' : '#2B2D42', // Off-white for dark, deep blue for light
+    text2: darkMode ? '#D9CBA3' : '#587B7F', // Sandy brown for dark, sea green for light
+    text3: darkMode ? '#BDA589' : '#8A817C', // Earthy tan for dark, stone gray for light
+    text4: darkMode ? '#587B7F' : '#D9CBA3', // Sea green for dark, sandy brown for light
+    text5: darkMode ? '#3C6E71' : '#E4E6E9', // Dark cyan for dark, light gray for light
 
-    // backgrounds / greys - Mimicking the textures and tones of natural materials
-    bg1: darkMode ? '#2A3648' : '#FFFBF1', // Midnight blue for dark, soft white for light
-    bg2: darkMode ? '#4E6577' : '#FFF6E0', // Dusky blue for dark, very pale yellow for light
-    bg3: darkMode ? '#3D5265' : '#EDE5D9', // Steel blue for dark, pale sand for light
-    bg4: darkMode ? '#333D4B' : '#DAD2C3', // Slate grey for dark, muted beige for light
-    bg5: darkMode ? '#293345' : '#CFC4B2', // Deep ocean blue for dark, warm grey for light
+    // backgrounds / greys - Emulating the diverse environments
+    bg1: darkMode ? '#262D31' : '#FEF9EF', // Dark slate for dark, warm white for light
+    bg2: darkMode ? '#3C6E71' : '#FFFCEB', // Dark cyan for dark, pale yellow for light
+    bg3: darkMode ? '#335C67' : '#F3F0D7', // Deep teal for dark, light cream for light
+    bg4: darkMode ? '#2F4858' : '#E9E4D0', // Navy blue for dark, soft beige for light
+    bg5: darkMode ? '#2B2D42' : '#DCD7C9', // Deep blue for dark, muted khaki for light
 
-    //specialty colors - Adding layers of depth and intrigue
-    modalBG: darkMode ? 'rgba(36, 47, 64, 0.85)' : 'rgba(255, 174, 66, 0.6)', // Dark slate for dark, soft amber for light
-    advancedBG: darkMode ? 'rgba(52, 61, 72, 0.1)' : 'rgba(255, 251, 241, 0.6)', // Charcoal mist for dark, morning haze for light
+    //specialty colors - Enhanced with a Latin vibe
+    modalBG: darkMode ? 'rgba(28, 49, 58, 0.85)' : 'rgba(255, 204, 109, 0.6)', // Ocean blue for dark, sunny yellow for light
+    advancedBG: darkMode ? 'rgba(49, 87, 94, 0.1)' : 'rgba(254, 249, 239, 0.6)', // Teal for dark, warm white for light
 
-    //primary colors - Radiant and lively, drawing from Latin America's colorful landscapes and cities
-    primary1: darkMode ? '#F2994A' : '#DB504A', // Warm amber for dark, vivid coral for light
-    primary2: darkMode ? '#EB5757' : '#F2C14E', // Soft red for dark, golden yellow for light
-    primary3: darkMode ? '#F2C14E' : '#8CB369', // Golden yellow for dark, fresh green for light
-    primary4: darkMode ? '#BB9457' : '#6B9080', // Bronze for dark, sage green for light
-    primary5: darkMode ? '#A89B68' : '#A4C3B2', // Olive gold for dark, seafoam green for light
+    //primary colors - Inspired by the spirited Latin American palette
+    primary1: darkMode ? '#FFBA08' : '#D62828', // Sunshine yellow for dark, fiery red for light
+    primary2: darkMode ? '#F77F00' : '#F4A261', // Bright orange for dark, soft orange for light
+    primary3: darkMode ? '#FCBF49' : '#2A9D8F', // Goldenrod for dark, calming teal for light
+    primary4: darkMode ? '#EAE2B7' : '#264653', // Pale yellow for dark, deep sea blue for light
+    primary5: darkMode ? '#F4A261' : '#E9C46A', // Soft orange for dark, amber for light
 
-    // color text - Lively and legible, complementing the primary hues
-    primaryText1: darkMode ? '#fff' : '#DB504A', // Warm amber vs vivid coral
+    // color text - Keeping high contrast for better legibility
+    primaryText1: darkMode ? '#fff' : '#D62828', // Sunshine yellow vs fiery red
 
-    // secondary colors - Subtle yet spirited, enhancing the overall palette
-    secondary1: darkMode ? '#DB504A' : '#F2994A', // Vivid coral for dark, warm amber for light
-    secondary2: darkMode ? '#333D4B' : '#EB5757', // Slate grey for dark, soft red for light
-    secondary3: darkMode ? '#333D4B' : '#F2C14E', // Slate grey for dark, golden yellow for light
+    // secondary colors - Subtle, yet colorful
+    secondary1: darkMode ? '#D62828' : '#FFBA08', // Fiery red for dark, sunshine yellow for light
+    secondary2: darkMode ? '#264653' : '#F77F00', // Deep sea blue for dark, bright orange for light
+    secondary3: darkMode ? '#264653' : '#FCBF49', // Deep sea blue for dark, goldenrod for light
 
-    // other - Keeping functional colors vibrant and expressive
-    red1: '#EB5757',
-    green1: '#27AE60',
-    yellow1: '#F2C14E',
-    yellow2: '#F2994A'
+    // other - Keeping essentials vibrant
+    red1: '#E76F51',
+    green1: '#2A9D8F',
+    yellow1: '#F4A259',
+    yellow2: '#E9C46A'
   }
 }
+
 
 export function theme(darkMode: boolean): DefaultTheme {
   return {

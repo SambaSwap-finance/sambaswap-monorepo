@@ -15,7 +15,7 @@ import { useActiveWeb3React } from '../../hooks';
 import { useDarkModeManager } from '../../state/user/hooks';
 import { YellowCard } from '../Card';
 
-import Logo from '../../assets/svg/logopng.png';
+import Logo from '../../assets/svg/logo.webp';
 import { RowBetween } from '../Row';
 
 const HeaderFrame = styled.div`
@@ -126,7 +126,7 @@ export default function Header() {
             {!isMobile && (
               <TitleText>
                 <HistoryLink id="link" to="/" style={{ textDecoration: 'none', marginLeft: '10px', color: isDark ? 'white' : 'black', fontSize: '20px', fontFamily: 'Lato' }}>
-                  SalsaSwap
+                  SambaSwap
                 </HistoryLink>
               </TitleText>
             )}
