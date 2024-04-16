@@ -36,50 +36,49 @@ const mediaWidthTemplates: { [width in keyof typeof MEDIA_WIDTHS]: typeof css } 
 export function colors(darkMode: boolean): Colors {
   return {
     // base
-    white: '#FEF9EF', // Warm white, reminiscent of sandy beaches
-    black: '#1F2329', // Deep, dark blue-black, like a tropical night
+    white: '#000', // White remains consistent for light and freshness
+    black: '#21374A', // Deep blue to maintain a sophisticated look in dark mode
 
-    // text - More vibrant, drawing from natural colors for readability
-    text1: darkMode ? '#FFF8E7' : '#2B2D42', // Off-white for dark, deep blue for light
-    text2: darkMode ? '#D9CBA3' : '#587B7F', // Sandy brown for dark, sea green for light
-    text3: darkMode ? '#BDA589' : '#8A817C', // Earthy tan for dark, stone gray for light
-    text4: darkMode ? '#587B7F' : '#D9CBA3', // Sea green for dark, sandy brown for light
-    text5: darkMode ? '#3C6E71' : '#E4E6E9', // Dark cyan for dark, light gray for light
+    // text - Enhanced contrast for readability, inspired by Brazilian vibrancy
+    text1: darkMode ? '#FAF9F6' : '#21374A', // Off-white for dark mode, deep blue for light mode
+    text2: darkMode ? '#B0B7C3' : '#325B72', // Soft grey for dark mode, rich sky blue for light mode
+    text3: darkMode ? '#A1ADC7' : '#437890', // Light grey-blue for dark mode, cerulean for light mode
+    text4: darkMode ? '#8E9AAC' : '#4D8FA6', // Greyish blue for dark mode, brighter blue for light mode
+    text5: darkMode ? '#778BA5' : '#5294B5', // Slate blue for dark mode, vibrant blue for light mode
 
-    // backgrounds / greys - Emulating the diverse environments
-    bg1: darkMode ? '#262D31' : '#FEF9EF', // Dark slate for dark, warm white for light
-    bg2: darkMode ? '#3C6E71' : '#FFFCEB', // Dark cyan for dark, pale yellow for light
-    bg3: darkMode ? '#335C67' : '#F3F0D7', // Deep teal for dark, light cream for light
-    bg4: darkMode ? '#2F4858' : '#E9E4D0', // Navy blue for dark, soft beige for light
-    bg5: darkMode ? '#2B2D42' : '#DCD7C9', // Deep blue for dark, muted khaki for light
+    // backgrounds / greys - Softened to complement the Brazilian-themed colors
+    bg1: darkMode ? '#21374A' : '#F0F0F0', // Deep blue for dark mode, light grey for light mode
+    bg2: darkMode ? '#325B72' : '#E1E8EB', // Rich sky blue for dark mode, pale blue-grey for light mode
+    bg3: darkMode ? '#437890' : '#C5CED1', // Cerulean for dark mode, soft grey for light mode
+    bg4: darkMode ? '#4D8FA6' : '#AEB9C4', // Brighter blue for dark mode, muted grey for light mode
+    bg5: darkMode ? '#5294B5' : '#9AA4AE', // Vibrant blue for dark mode, steel grey for light mode
 
-    //specialty colors - Enhanced with a Latin vibe
-    modalBG: darkMode ? 'rgba(28, 49, 58, 0.85)' : 'rgba(255, 204, 109, 0.6)', // Ocean blue for dark, sunny yellow for light
-    advancedBG: darkMode ? 'rgba(49, 87, 94, 0.1)' : 'rgba(254, 249, 239, 0.6)', // Teal for dark, warm white for light
+    // specialty colors - Tinted to reflect a tropical and digital feel
+    modalBG: darkMode ? 'rgba(33, 55, 74, 0.85)' : 'rgba(255, 209, 0, 0.6)', // Navy for dark mode, golden for light mode
+    advancedBG: darkMode ? 'rgba(50, 75, 92, 0.1)' : 'rgba(0, 155, 58, 0.6)', // Ocean blue for dark mode, jungle green for light mode
 
-    //primary colors - Inspired by the spirited Latin American palette
-    primary1: darkMode ? '#FFBA08' : '#D62828', // Sunshine yellow for dark, fiery red for light
-    primary2: darkMode ? '#F77F00' : '#F4A261', // Bright orange for dark, soft orange for light
-    primary3: darkMode ? '#FCBF49' : '#2A9D8F', // Goldenrod for dark, calming teal for light
-    primary4: darkMode ? '#EAE2B7' : '#264653', // Pale yellow for dark, deep sea blue for light
-    primary5: darkMode ? '#F4A261' : '#E9C46A', // Soft orange for dark, amber for light
+    // primary colors - Bold and thematic, aligned with Brazil's colors
+    primary1: darkMode ? '#FFD700' : '#00A550', // Gold for dark mode, pine green for light mode
+    primary2: darkMode ? '#C1A33B' : '#FFD700', // Metallic gold for dark mode, bright yellow for light mode
+    primary3: darkMode ? '#325B72' : '#2E5090', // Rich sky blue for dark mode, flag blue for light mode
+    primary4: darkMode ? '#437890' : '#FFD700', // Cerulean for dark mode, bright yellow for light mode
+    primary5: darkMode ? '#4D8FA6' : '#00A550', // Brighter blue for dark mode, pine green for light mode
 
-    // color text - Keeping high contrast for better legibility
-    primaryText1: darkMode ? '#fff' : '#D62828', // Sunshine yellow vs fiery red
+    // color text - Focused on visibility against the primary and background colors
+    primaryText1: darkMode ? '#FAF9F6' : '#21374A', // Off-white vs deep blue
 
-    // secondary colors - Subtle, yet colorful
-    secondary1: darkMode ? '#D62828' : '#FFBA08', // Fiery red for dark, sunshine yellow for light
-    secondary2: darkMode ? '#264653' : '#F77F00', // Deep sea blue for dark, bright orange for light
-    secondary3: darkMode ? '#264653' : '#FCBF49', // Deep sea blue for dark, goldenrod for light
+    // secondary colors - A balance between accent and subtlety
+    secondary1: darkMode ? '#FFD700' : '#21374A', // Bright yellow for dark mode, deep blue for light mode
+    secondary2: darkMode ? '#C1A33B' : '#325B72', // Metallic gold for dark mode, rich sky blue for light mode
+    secondary3: darkMode ? '#A1ADC7' : '#437890', // Light grey-blue for dark mode, cerulean for light mode
 
-    // other - Keeping essentials vibrant
-    red1: '#E76F51',
-    green1: '#2A9D8F',
-    yellow1: '#F4A259',
-    yellow2: '#E9C46A'
+    // other - Ensuring functional colors are clear and distinct
+    red1: '#E63946', // Crisp red, suitable for alerts and warnings
+    green1: '#00A550', // Pine green, for success and confirmation messages
+    yellow1: '#FFD700', // Bright yellow, for attention and caution
+    yellow2: '#FFC107' // Amber, for highlights and important buttons
   }
 }
-
 
 export function theme(darkMode: boolean): DefaultTheme {
   return {
