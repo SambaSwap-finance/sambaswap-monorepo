@@ -4,7 +4,7 @@ import MAINNET_TOKENS from './mainnet'
 import RINKEBY_TOKENS from './rinkeby'
 import ROPSTEN_TOKENS from './ropsten'
 
-type AllTokens = Readonly<{ [chainId in ChainId | 418]: Readonly<{ [tokenAddress: string]: Token }> }>
+type AllTokens = Readonly<{ [chainId in ChainId | 418 | 274]: Readonly<{ [tokenAddress: string]: Token }> }>
 export const ALL_TOKENS: AllTokens = [
   // WETH on all chains
   ...Object.values(WETH),
@@ -40,6 +40,7 @@ export const ALL_TOKENS: AllTokens = [
       [ChainId.GÖRLI]: {},
       [ChainId.ROPSTEN]: {},
       [ChainId.KOVAN]: {},
-      418: {}
+      418: {},
+      274: {}
     }
   )
