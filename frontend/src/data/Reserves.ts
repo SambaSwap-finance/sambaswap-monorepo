@@ -11,6 +11,7 @@ import { useSingleCallResult } from '../state/multicall/hooks'
  */
 export function usePair(tokenA?: Token, tokenB?: Token): undefined | Pair | null {
   const pairAddress = tokenA && tokenB && !tokenA.equals(tokenB) ? Pair.getAddress(tokenA, tokenB) : undefined
+  console.log("pairAddress: ", pairAddress);
   const contract = usePairContract(pairAddress, false)
   const { result: reserves, loading } = useSingleCallResult(contract, 'getReserves')
 

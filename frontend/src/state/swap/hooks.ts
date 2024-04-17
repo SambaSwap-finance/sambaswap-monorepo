@@ -142,14 +142,6 @@ export function useDerivedSwapInfo(): {
   if (balanceIn && amountIn && balanceIn.lessThan(amountIn)) {
     error = 'Insufficient ' + amountIn.token.symbol + ' balance'
   }
-  console.log({
-    tokens,
-    tokenBalances,
-    parsedAmounts,
-    bestTrade,
-    error,
-    v1TradeLinkIfBetter
-  });
   return {
     tokens,
     tokenBalances,
