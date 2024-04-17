@@ -1,7 +1,7 @@
 import { ChainId, JSBI, Percent, Token, WETH } from '@uniswap/sdk'
 import { fortmatic, injected, portis, walletconnect, walletlink } from '../connectors'
 
-export const ROUTER_ADDRESS = '0xaB9e9Dcb1CE614e5D6F6a912F4295C88E283670d'
+export const ROUTER_ADDRESS = '0xFb118B9656E0847ff7AF2C8380ecfD1E5d087Ca4'
 
 // used for display in the default list when adding liquidity
 export const COMMON_BASES = {
