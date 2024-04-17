@@ -31,8 +31,13 @@ const ETHERSCAN_PREFIXES: { [chainId in ChainId]: string } = {
 }
 
 export function getEtherscanLink(chainId: ChainId, data: string, type: 'transaction' | 'address'): string {
-  const prefix = chainId === 418 ? 'https://testexplorer.lachain.network' : `https://${ETHERSCAN_PREFIXES[chainId] || ETHERSCAN_PREFIXES[1]}etherscan.io`
-  
+  const prefix =
+    chainId === (274 as ChainId)
+      ? 'https://explorer.lachain.network'
+      : chainId === (418 as ChainId)
+      ? 'https://testexplorer.lachain.network'
+      : `https://${ETHERSCAN_PREFIXES[chainId] || ETHERSCAN_PREFIXES[1]}etherscan.io`
+
   switch (type) {
     case 'transaction': {
       return `${prefix}/tx/${data}`

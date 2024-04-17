@@ -29,6 +29,7 @@ enum STEP {
 
 export default function CreatePool({ history, location }: RouteComponentProps) {
   WETH[418] = new Token(418 as ChainId, '0x2B6649a5f04Ee1def4B8E07Df13040D816094eeD', 18, 'WETH', 'Wrapped LAC')
+  WETH[274 as ChainId] = new Token(274 as ChainId, '0xdcb679Ac6C72d438e66D39f3FB3364dED7254FC9', 18, 'WETH', 'Nativo Wrapped LAC (wLAC)')
   const { chainId } = useActiveWeb3React()
   const [showSearch, setShowSearch] = useState<boolean>(false)
   const [activeField, setActiveField] = useState<number>(Fields.TOKEN0)
