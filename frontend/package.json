@@ -3,6 +3,9 @@
   "description": "Uniswap Interface",
   "homepage": "https://uniswap.exchange",
   "private": true,
+  "dependencies": {
+    "@uniswap/sdk": "file:node_modules/@uniswap/sdk"
+  },
   "devDependencies": {
     "@ethersproject/address": "^5.0.0-beta.134",
     "@ethersproject/bignumber": "^5.0.0-beta.138",
@@ -32,7 +35,6 @@
     "@types/testing-library__cypress": "^5.0.5",
     "@typescript-eslint/eslint-plugin": "^2.31.0",
     "@typescript-eslint/parser": "^2.31.0",
-    "@uniswap/sdk": "file:./node_modules/@uniswap/sdk",
     "@uniswap/v2-core": "1.0.0",
     "@uniswap/v2-periphery": "1.0.0-beta.0",
     "@web3-react/core": "^6.0.9",
