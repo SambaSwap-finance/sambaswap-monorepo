@@ -1,4 +1,4 @@
-import { ChainId, JSBI, Percent, Token, WETH } from '@uniswap/sdk'
+import { ChainId, JSBI, Percent, Token, WETH } from '@uniswap/sdk-fork'
 import { fortmatic, injected, portis, walletconnect, walletlink } from '../connectors'
 
 export const ROUTER_ADDRESS = '0xFb118B9656E0847ff7AF2C8380ecfD1E5d087Ca4'

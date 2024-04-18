@@ -1,4 +1,4 @@
-import { Fraction, JSBI, Percent, TokenAmount, Trade } from '@uniswap/sdk'
+import { Fraction, JSBI, Percent, TokenAmount, Trade } from '@uniswap/sdk-fork'
 import { ALLOWED_PRICE_IMPACT_HIGH, ALLOWED_PRICE_IMPACT_LOW, ALLOWED_PRICE_IMPACT_MEDIUM } from '../constants'
 import { Field } from '../state/swap/actions'
 import { basisPointsToPercent } from './index'

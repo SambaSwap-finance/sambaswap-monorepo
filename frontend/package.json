@@ -4,7 +4,7 @@
   "homepage": "https://uniswap.exchange",
   "private": true,
   "dependencies": {
-    "@uniswap/sdk": "file:node_modules/@uniswap/sdk"
+    "@uniswap/sdk-fork": "file:node_modules/@uniswap/sdk-fork"
   },
   "devDependencies": {
     "@ethersproject/address": "^5.0.0-beta.134",

@@ -1,4 +1,4 @@
-import { Token, TokenAmount, Pair } from '@uniswap/sdk'
+import { Token, TokenAmount, Pair } from '@uniswap/sdk-fork'
 import { useMemo } from 'react'
 
 import { usePairContract } from '../hooks/useContract'

@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { WETH, Token, TokenAmount, Trade, ChainId, Pair } from '@uniswap/sdk'
+import { WETH, Token, TokenAmount, Trade, ChainId, Pair } from '@uniswap/sdk-fork'
 import { useActiveWeb3React } from './index'
 import { usePair } from '../data/Reserves'
 

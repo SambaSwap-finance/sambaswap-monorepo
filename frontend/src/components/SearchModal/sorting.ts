@@ -1,4 +1,4 @@
-import { Token, TokenAmount, WETH } from '@uniswap/sdk'
+import { Token, TokenAmount, WETH } from '@uniswap/sdk-fork'
 import { useMemo } from 'react'
 import { useActiveWeb3React } from '../../hooks'
 import { useAllTokenBalancesTreatingWETHasETH } from '../../state/wallet/hooks'

@@ -1,4 +1,4 @@
-import { JSBI, Token } from '@uniswap/sdk'
+import { JSBI, Token } from '@uniswap/sdk-fork'
 import React, { useMemo } from 'react'
 import { RouteComponentProps } from 'react-router'
 import { useAllV1ExchangeAddresses } from '../../data/V1'
