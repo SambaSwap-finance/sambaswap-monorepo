@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { RouteComponentProps, Redirect } from 'react-router-dom'
-import { ChainId, Token, WETH } from '@uniswap/sdk'
+import { ChainId, Token, WETH } from '@uniswap/sdk-fork'
 import AppBody from '../AppBody'
 
 import Row, { AutoRow } from '../../components/Row'

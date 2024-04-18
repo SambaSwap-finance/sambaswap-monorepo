@@ -11,7 +11,7 @@ import { ROUTER_ADDRESS } from '../constants'
 
 import ERC20_ABI from '../constants/abis/erc20.json'
 import ERC20_BYTES32_ABI from '../constants/abis/erc20_bytes32.json'
-import { ChainId, JSBI, Percent, TokenAmount } from '@uniswap/sdk'
+import { ChainId, JSBI, Percent, TokenAmount } from '@uniswap/sdk-fork'
 
 // returns the checksummed address if the address is valid, otherwise returns false
 export function isAddress(value: any): string | false {

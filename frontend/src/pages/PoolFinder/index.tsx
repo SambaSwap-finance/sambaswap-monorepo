@@ -1,4 +1,4 @@
-import { JSBI, Pair, Token, TokenAmount } from '@uniswap/sdk'
+import { JSBI, Pair, Token, TokenAmount } from '@uniswap/sdk-fork'
 import React, { useEffect, useState } from 'react'
 import { Plus } from 'react-feather'
 import { RouteComponentProps } from 'react-router-dom'

@@ -8,7 +8,7 @@ import Menu from '../Menu';
 import Row from '../Row';
 import Web3Status from '../Web3Status';
 
-import { ChainId, WETH } from '@uniswap/sdk';
+import { ChainId, WETH } from '@uniswap/sdk-fork';
 import { isMobile } from 'react-device-detect';
 import { Text } from 'rebass';
 import { useActiveWeb3React } from '../../hooks';

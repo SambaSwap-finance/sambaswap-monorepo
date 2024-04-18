@@ -1,4 +1,4 @@
-import { Pair, Token } from '@uniswap/sdk'
+import { Pair, Token } from '@uniswap/sdk-fork'
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { useTranslation } from 'react-i18next'

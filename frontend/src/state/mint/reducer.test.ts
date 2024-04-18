@@ -1,4 +1,4 @@
-import { ChainId, WETH } from '@uniswap/sdk'
+import { ChainId, WETH } from '@uniswap/sdk-fork'
 import { createStore, Store } from 'redux'
 
 import { Field, setDefaultsFromURLMatchParams } from './actions'
