@@ -1,11 +1,11 @@
 import React, { Suspense } from 'react'
 import { BrowserRouter, HashRouter, Route, Switch } from 'react-router-dom'
 import styled from 'styled-components'
-import GoogleAnalyticsReporter from '../components/analytics/GoogleAnalyticsReporter'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
 import Popups from '../components/Popups'
 import Web3ReactManager from '../components/Web3ReactManager'
+import GoogleAnalyticsReporter from '../components/analytics/GoogleAnalyticsReporter'
 import DarkModeQueryParamReader from '../theme/DarkModeQueryParamReader'
 import AddLiquidity from './AddLiquidity'
 import CreatePool from './CreatePool'
@@ -15,7 +15,6 @@ import RemoveLiquidity from './RemoveLiquidity'
 import Send from './Send'
 import Swap from './Swap'
 import { RedirectPathToSwapOnly, RedirectToSwap } from './Swap/redirects'
-import { UniswapTradingview, Dex } from 'uniswap-tradingview';
 
 
 const AppWrapper = styled.div`
@@ -82,11 +81,11 @@ if (process.env.PUBLIC_URL === '.') {
 
 export default function App() {
 
-  const chart = new UniswapTradingview({ dex: Dex.LACHAIN });
-  const pairAddress = '0x7b9d569f2be66280d14cef814c8e230e3e51393d';
-  React.useEffect(() => {
-    chart.createChart('uniswap_tradingview_chart', { width: 1000, height: 500 }, pairAddress, '1d', 'CANDLE');
-  }, []);
+  // const chart = new UniswapTradingview({ dex: Dex.LACHAIN });
+  // const pairAddress = '0x7b9d569f2be66280d14cef814c8e230e3e51393d';
+  // React.useEffect(() => {
+  //   chart.createChart('uniswap_tradingview_chart', { width: 1000, height: 500 }, pairAddress, '1d', 'CANDLE');
+  // }, []);
   return (
     <Suspense fallback={null}>
       <Router>
@@ -112,7 +111,7 @@ export default function App() {
               </Switch>
             </Web3ReactManager>
             <Marginer />
-            <div id="uniswap_tradingview_chart"></div>
+            {/* <div id="uniswap_tradingview_chart"></div> */}
             <Footer />
           </BodyWrapper>
           <BackgroundGradient />
