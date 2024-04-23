@@ -1,0 +1,25 @@
+specVersion: 0.0.4
+description: Blocks
+repository: https://github.com/sushiswap/subgraphs
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: UniswapV2Factory
+    network: mainnet
+    source:
+      address: '0xeDcAB5486F21E306f7e49599E8f3893F71098693'
+      startBlock: 2620882
+      abi: UniswapV2Factory
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      file: ./src/mappings/blocks.ts
+      entities:
+        - Blocks
+      abis:
+        - name: UniswapV2Factory
+          file: ./abis/UniswapV2Factory.json
+      blockHandlers:
+        - handler: onBlock

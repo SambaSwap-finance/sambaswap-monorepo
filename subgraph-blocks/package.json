@@ -1,0 +1,31 @@
+{
+  "name": "blocks",
+  "license": "MIT",
+  "repository": {
+    "url": "sushiswap/subgraphs",
+    "directory": "subgraphs/blocks"
+  },
+  "files": [
+    "generated"
+  ],
+  "scripts": {
+    "generate": "graph codegen",
+    "build": "graph build",
+    "test": "graph test -r",
+    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ sushiswap/blocks",
+    "create-local": "graph create --node http://191.252.202.251:8020/ sushiswap/blocks",
+    "remove-local": "graph remove --node http://191.252.202.251:8020/ sushiswap/blocks",
+    "deploy-local": "graph deploy --node http://191.252.202.251:8020/ --ipfs http://191.252.202.251:5001 sushiswap/blocks",
+    "deploy-moonriver": "graph deploy --product hosted-service sushiswap/blocks-moonriver",
+    "deploy-fuse": "graph deploy --product hosted-service sushiswap/blocks-fuse",
+    "deploy-kava": "graph deploy --node https://pvt-admin.graph.kava.io sushiswap/blocks-kava",
+    "deploy-metis": "graph deploy --node https://andromeda.thegraph.metisdevops.link:8020 --ipfs https://ipfs.thegraph.metisdevops.link:5001 sushiswap/blocks-metis"
+  },
+  "devDependencies": {
+    "@graphprotocol/graph-cli": "^0.60.0",
+    "@graphprotocol/graph-ts": "^0.27.0",
+    "matchstick-as": "0.5.0",
+    "assemblyscript": "^0.19.20",
+    "wabt": "1.0.24"
+  }
+}

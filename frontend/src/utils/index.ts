@@ -35,8 +35,8 @@ export function getEtherscanLink(chainId: ChainId, data: string, type: 'transact
     chainId === (274 as ChainId)
       ? 'https://explorer.lachain.network'
       : chainId === (418 as ChainId)
-      ? 'https://testexplorer.lachain.network'
-      : `https://${ETHERSCAN_PREFIXES[chainId] || ETHERSCAN_PREFIXES[1]}etherscan.io`
+        ? 'https://testexplorer.lachain.network'
+        : `https://${ETHERSCAN_PREFIXES[chainId] || ETHERSCAN_PREFIXES[1]}explorer.lachain.network`
 
   switch (type) {
     case 'transaction': {
