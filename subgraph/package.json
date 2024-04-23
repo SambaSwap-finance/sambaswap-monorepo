@@ -12,9 +12,9 @@
     "generate": "graph codegen",
     "build": "graph build",
     "test": "graph test -r",
-    "create-local": "graph create --node http://191.252.202.251:8020/ sushiswap/v2-ethereum",
-    "remove-local": "graph remove --node http://191.252.202.251:8020/ sushiswap/v2-ethereum",
-    "deploy-local": "graph deploy --node http://191.252.202.251:8020/ --ipfs http://191.252.202.251:5001 sushiswap/v2-ethereum"
+    "create-local": "graph create --node http://3.82.138.153:8020/ sushiswap/v2-ethereum",
+    "remove-local": "graph remove --node http://3.82.138.153:8020/ sushiswap/v2-ethereum",
+    "deploy-local": "graph deploy --node http://3.82.138.153:8020/ --ipfs http://3.82.138.153:5001 sushiswap/v2-ethereum"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.60.0",

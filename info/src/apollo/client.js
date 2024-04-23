@@ -4,7 +4,7 @@ import { HttpLink } from 'apollo-link-http'
 
 export const client = new ApolloClient({
   link: new HttpLink({
-    uri: 'http://191.252.202.251:8000/subgraphs/name/sushiswap/v2-ethereum/',
+    uri: 'https://subgraph.sambaswap.xyz/subgraphs/name/sushiswap/v2-ethereum/',
   }),
   cache: new InMemoryCache(),
   shouldBatch: true,
@@ -36,7 +36,7 @@ export const stakingClient = new ApolloClient({
 
 export const blockClient = new ApolloClient({
   link: new HttpLink({
-    uri: 'http://191.252.202.251:8000/subgraphs/name/sushiswap/blocks',
+    uri: 'https://subgraph.sambaswap.xyz/subgraphs/name/sushiswap/blocks',
   }),
   cache: new InMemoryCache(),
 })
