@@ -183,14 +183,14 @@ export default function Provider({ children }) {
 }
 
 async function getBulkPairData(pairList, ethPrice) {
-  // const [t1, t2, tWeek] = getTimestampsForChanges()
+  const [t1, t2, tWeek] = getTimestampsForChanges()
   // const t1 = 2620882;
   // const t2 = 2620948;
   // const tWeek = 2620882;
   // TODO: remove hardcoded timestamps
-  const t1 = 1713910031;
-  const t2 = 1713910031;
-  const tWeek = 1713910031;
+  // const t1 = 1713910031;
+  // const t2 = 1713910031;
+  // const tWeek = 1713910031;
   // const res = await getBlocksFromTimestamps([t1, t2, tWeek])
   // console.log({ res, t1, t2, tWeek })
 

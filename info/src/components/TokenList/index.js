@@ -138,7 +138,6 @@ function TopTokenList({ tokens, itemMax = 10, useTracked = false }) {
     setMaxPage(1) // edit this to do modular
     setPage(1)
   }, [tokens])
-  console.log({ tokens });
   const formattedTokens = useMemo(() => {
     return (
       tokens &&

@@ -222,11 +222,11 @@ export default function Provider({ children }) {
 
 const getTopTokens = async (ethPrice, ethPriceOld) => {
   const utcCurrentTime = dayjs()
-  // const utcOneDayBack = utcCurrentTime.subtract(1, 'day').unix()
-  // const utcTwoDaysBack = utcCurrentTime.subtract(2, 'day').unix()
+  const utcOneDayBack = utcCurrentTime.subtract(1, 'day').unix()
+  const utcTwoDaysBack = utcCurrentTime.subtract(2, 'day').unix()
   // TODO: remove hardcoded timestamps
-  const utcOneDayBack = 1713837170;
-  const utcTwoDaysBack = 1713837367;
+  // const utcOneDayBack = 1713837170;
+  // const utcTwoDaysBack = 1713837367;
 
   let oneDayBlock = await getBlockFromTimestamp(utcOneDayBack)
   let twoDayBlock = await getBlockFromTimestamp(utcTwoDaysBack)
@@ -370,11 +370,11 @@ const getTopTokens = async (ethPrice, ethPriceOld) => {
 const getTokenData = async (address, ethPrice, ethPriceOld) => {
   const utcCurrentTime = dayjs()
   // TODO: remove hardcoded timestamps
-  const utcOneDayBack = 1713837170;
-  const utcTwoDaysBack = 1713837367;
+  // const utcOneDayBack = 1713837170;
+  // const utcTwoDaysBack = 1713837367;
 
-  // const utcOneDayBack = utcCurrentTime.subtract(1, 'day').startOf('minute').unix()
-  // const utcTwoDaysBack = utcCurrentTime.subtract(2, 'day').startOf('minute').unix()
+  const utcOneDayBack = utcCurrentTime.subtract(1, 'day').startOf('minute').unix()
+  const utcTwoDaysBack = utcCurrentTime.subtract(2, 'day').startOf('minute').unix()
   let oneDayBlock = await getBlockFromTimestamp(utcOneDayBack)
   let twoDayBlock = await getBlockFromTimestamp(utcTwoDaysBack)
 
