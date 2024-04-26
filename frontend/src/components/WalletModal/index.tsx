@@ -17,6 +17,7 @@ import MetamaskIcon from '../../assets/images/metamask.png'
 import { ReactComponent as Close } from '../../assets/images/x.svg'
 import { injected, walletconnect, fortmatic, portis } from '../../connectors'
 import { OVERLAY_READY } from '../../connectors/Fortmatic'
+import { ButtonLight } from '../Button'
 
 const CloseIcon = styled.div`
   position: absolute;
@@ -292,6 +293,29 @@ export default function WalletModal({
     })
   }
 
+  async function addLachainNetwork() {
+
+    try {
+      const result = await (window.ethereum as any).request({
+        method: "wallet_addEthereumChain",
+        params: [{
+          chainId: "0x112",
+          rpcUrls: ["https://rpc1.mainnet.lachain.network"],
+          chainName: "Lachain Mainnet",
+          nativeCurrency: {
+            name: "LAC",
+            symbol: "LAC",
+            decimals: 18
+          },
+          blockExplorerUrls: ["https://explorer.lachain.network"]
+        }]
+      });
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+
   function getModalContent() {
     if (error) {
       return (
@@ -302,7 +326,12 @@ export default function WalletModal({
           <HeaderRow>{error instanceof UnsupportedChainIdError ? 'Wrong Network' : 'Error connecting'}</HeaderRow>
           <ContentWrapper>
             {error instanceof UnsupportedChainIdError ? (
-              <h5>Please connect to the appropriate Ethereum network.</h5>
+              <>
+                <h5>Please connect to the appropriate LAChain network.</h5>
+                <ButtonLight onClick={addLachainNetwork}>
+                  Add LAChain Network to metamask
+                </ButtonLight>
+              </>
             ) : (
               'Error connecting. Try refreshing the page.'
             )}

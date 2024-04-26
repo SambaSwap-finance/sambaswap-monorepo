@@ -9,7 +9,7 @@ dataSources:
     network: mainnet
     source:
       address: '0xCEaB4e71463c643B7E5776D14995D8015e1Fa14b'
-      startBlock: 2620882
+      startBlock: 2420882
       abi: UniswapV2Factory
     mapping:
       kind: ethereum/events

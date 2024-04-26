@@ -135,6 +135,7 @@ export default function Header() {
         <HeaderElement>
           <TestnetWrapper>
             {!isMobile && chainId === ChainId.ROPSTEN && <NetworkCard>Ropsten</NetworkCard>}
+            {!isMobile && chainId === 418 as ChainId && <NetworkCard>LachainTestnet</NetworkCard>}
             {!isMobile && chainId === ChainId.RINKEBY && <NetworkCard>Rinkeby</NetworkCard>}
             {!isMobile && chainId === ChainId.GÖRLI && <NetworkCard>Görli</NetworkCard>}
             {!isMobile && chainId === ChainId.KOVAN && <NetworkCard>Kovan</NetworkCard>}
@@ -142,7 +143,7 @@ export default function Header() {
           <AccountElement active={!!account} style={{ pointerEvents: 'auto' }}>
             {account && userEthBalance ? (
               <Text style={{ flexShrink: 0 }} px="0.5rem" fontWeight={500}>
-                {userEthBalance?.toSignificant(4)} ETH
+                {userEthBalance?.toSignificant(4)} LAC
               </Text>
             ) : null}
             <Web3Status />

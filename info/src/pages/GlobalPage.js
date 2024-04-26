@@ -69,7 +69,7 @@ function GlobalPage() {
 
   return (
     <PageWrapper>
-      <ThemedBackground backgroundColor={transparentize(0.6, '#ff007a')} />
+      <ThemedBackground backgroundColor={transparentize(0.6, '#365a6e')} />
       <ContentWrapper>
         <div>
           <AutoColumn gap="24px" style={{ paddingBottom: below800 ? '0' : '24px' }}>
@@ -77,7 +77,7 @@ function GlobalPage() {
             <Search />
             <GlobalStats />
           </AutoColumn>
-          {below800 && ( // mobile card
+          {/* {below800 && ( // mobile card
             <Box mb={20}>
               <Panel>
                 <Box>
@@ -112,7 +112,7 @@ function GlobalPage() {
                 </Box>
               </Panel>
             </Box>
-          )}
+          )} */}
           {!below800 && (
             <GridRow>
               {/* <Panel style={{ height: '100%', minHeight: '300px' }}>
@@ -123,13 +123,13 @@ function GlobalPage() {
               </Panel> */}
             </GridRow>
           )}
-          {below800 && (
+          {/* {below800 && (
             <AutoColumn style={{ marginTop: '6px' }} gap="24px">
               <Panel style={{ height: '100%', minHeight: '300px' }}>
                 <GlobalChart display="liquidity" />
               </Panel>
             </AutoColumn>
-          )}
+          )} */}
           <ListOptions gap="10px" style={{ marginTop: '2rem', marginBottom: '.5rem' }}>
             <RowBetween>
               <TYPE.main fontSize={'1.125rem'} style={{ whiteSpace: 'nowrap' }}>

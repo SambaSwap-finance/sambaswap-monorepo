@@ -12,16 +12,20 @@ export const ALL_TOKENS: AllTokens = [
   ...MAINNET_TOKENS,
   ...RINKEBY_TOKENS,
   ...KOVAN_TOKENS,
-  ...ROPSTEN_TOKENS
+  ...ROPSTEN_TOKENS,
 ]
-  // remap WETH to ETH
-  .map(token => {
-    if (token.equals(WETH[token.chainId])) {
-      ;(token as any).symbol = 'ETH'
-      ;(token as any).name = 'Ether'
-    }
-    return token
-  })
+  // // remap WETH to ETH
+  // .map(token => {
+  //   if (token.equals(WETH[token.chainId])) {
+  //     ; (token as any).symbol = 'ETH'
+  //       ; (token as any).name = 'Ether'
+  //   }
+  //   return token
+  // })
+  .concat([
+    new Token(274 as ChainId, '0xDe09E74d4888Bc4e65F589e8c13Bce9F71DdF4c7', 18, 'UXD', 'Criptodolar UXD'),
+    new Token(274 as ChainId, '0x42C8C9C0f0A98720dACdaeaC0C319cb272b00d7E', 18, 'WETH', 'Wrapped Ether (WETH)'),
+  ])
   // put into an object
   .reduce<AllTokens>(
     (tokenMap, token) => {
