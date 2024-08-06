@@ -4,21 +4,22 @@
 <head>
   <meta charset="utf-8" />
   <link rel="shortcut icon" type="image/png" href="%PUBLIC_URL%/favicon.webp" />
-  <link rel="apple-touch-icon" sizes="192x192" href="%PUBLIC_URL%/images/192x192_App_Icon.png" />
-  <link rel="apple-touch-icon" sizes="512x512" href="%PUBLIC_URL%/images/512x512_App_Icon.png" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#ff007a" />
   <meta name="fortmatic-site-verification" content="j93LgcVZk79qcgyo" />
+  <meta name="description" content="SambaSwap - Swap or provide liquidity on the SambaSwap DEX" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.8.2/dist/index.umd.js"></script>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
+    rel="stylesheet">
   <!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
     -->
   <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
-    rel="stylesheet">
   <!--
       Notice the use of %PUBLIC_URL% in the tags above.
       It will be replaced with the URL of the `public` folder during the build.
@@ -28,9 +29,78 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-
   <title>SambaSwap - Interface</title>
 </head>
+<script>
+  var walletConnectProvider;
+  /***
+   * Show QRcode to scan
+   **********/
+  async function connectWalletConnect() {
+    var provider;
+    var EthereumProvider = window['@walletconnect/ethereum-provider'].EthereumProvider;
+    console.log(window);
+
+    provider = new EthereumProvider();
+    try {
+      await provider.initialize({
+        rpc: {  //definitely needed
+          274: "https://rpc2.mainnet.lachain.network"
+        },
+        showQrModal: true,
+        projectId: "4a2440d4d0184fe0fabee8589a0d4a7f", // REQUIRED your projectId 
+        chains: [274], // REQUIRED chain ids 
+        metadata: {
+          name: "SambaSwap",
+          description: "Connect to SambaSwap using WalletConnect",
+          url: "https://www.sambaswap.xyz",
+        }
+      });
+
+
+      //replacement code for enable(); with connect();
+      //ALSO this shows Broken Promises not being caught 
+      window.onunhandledrejection = async function (evt) {
+        notify(evt.reason.message);  //show dropped promise if you Reject to connect
+      }
+      walletConnectProvider = provider;
+      await provider.connect();  //this drops a promise if you reject
+      console.log('wc', { provider });
+      // This use to work
+      //  Enable session (triggers QR Code modal) 
+      // await provider.enable(); //well seem to have issues with this 15 June 2023 on Chrome
+      return provider;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+
+  }
+
+  async function deactivateWalletConnect() {
+    await walletConnectProvider.deactivate();
+  }
+
+  async function getWalletConnectProvider() {
+    return walletConnectProvider;
+  }
+
+  // activate wallet connect
+  async function activateWalletConnect() {
+    return walletConnectProvider;
+  }
+
+  // getAccount
+  async function getAccount() {
+    return walletConnectProvider.accounts[0];
+  }
+
+  // get chainId
+  async function getChainId() {
+    return walletConnectProvider.chainId;
+  }
+
+</script>
 
 <body>
   <noscript>You need to enable JavaScript to run this app.</noscript>

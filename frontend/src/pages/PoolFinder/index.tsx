@@ -1,171 +1,191 @@
-import { JSBI, Pair, Token, TokenAmount } from '@uniswap/sdk-fork'
-import React, { useEffect, useState } from 'react'
+import { Currency, ETHER, JSBI, TokenAmount } from '@uniswap/sdk'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Plus } from 'react-feather'
-import { RouteComponentProps } from 'react-router-dom'
 import { Text } from 'rebass'
-import { ButtonDropwdown, ButtonDropwdownLight, ButtonPrimary } from '../../components/Button'
+import { ButtonDropdownLight } from '../../components/Button'
 import { LightCard } from '../../components/Card'
 import { AutoColumn, ColumnCenter } from '../../components/Column'
-import PositionCard from '../../components/PositionCard'
+import CurrencyLogo from '../../components/CurrencyLogo'
+import { FindPoolTabs } from '../../components/NavigationTabs'
+import { MinimalPositionCard } from '../../components/PositionCard'
 import Row from '../../components/Row'
-import SearchModal from '../../components/SearchModal'
-import TokenLogo from '../../components/TokenLogo'
-import { usePair } from '../../data/Reserves'
+import CurrencySearchModal from '../../components/SearchModal/CurrencySearchModal'
+import { PairState, usePair } from '../../data/Reserves'
 import { useActiveWeb3React } from '../../hooks'
-import { useToken } from '../../hooks/Tokens'
 import { usePairAdder } from '../../state/user/hooks'
-import { useTokenBalanceTreatingWETHasETH } from '../../state/wallet/hooks'
-import { Link } from '../../theme'
+import { useTokenBalance } from '../../state/wallet/hooks'
+import { StyledInternalLink } from '../../theme'
+import { currencyId } from '../../utils/currencyId'
 import AppBody from '../AppBody'
+import { Dots } from '../Pool/styleds'
 
 enum Fields {
   TOKEN0 = 0,
   TOKEN1 = 1
 }
 
-export default function PoolFinder({ history }: RouteComponentProps) {
+export default function PoolFinder() {
   const { account } = useActiveWeb3React()
+
   const [showSearch, setShowSearch] = useState<boolean>(false)
-  const [activeField, setActiveField] = useState<number>(Fields.TOKEN0)
+  const [activeField, setActiveField] = useState<number>(Fields.TOKEN1)
 
-  const [token0Address, setToken0Address] = useState<string>()
-  const [token1Address, setToken1Address] = useState<string>()
-  const token0: Token = useToken(token0Address)
-  const token1: Token = useToken(token1Address)
+  const [currency0, setCurrency0] = useState<Currency | null>(ETHER)
+  const [currency1, setCurrency1] = useState<Currency | null>(null)
 
-  const pair: Pair = usePair(token0, token1)
+  const [pairState, pair] = usePair(currency0 ?? undefined, currency1 ?? undefined)
   const addPair = usePairAdder()
-
   useEffect(() => {
     if (pair) {
       addPair(pair)
     }
   }, [pair, addPair])
 
-  const position: TokenAmount = useTokenBalanceTreatingWETHasETH(account, pair?.liquidityToken)
+  const validPairNoLiquidity: boolean =
+    pairState === PairState.NOT_EXISTS ||
+    Boolean(
+      pairState === PairState.EXISTS &&
+        pair &&
+        JSBI.equal(pair.reserve0.raw, JSBI.BigInt(0)) &&
+        JSBI.equal(pair.reserve1.raw, JSBI.BigInt(0))
+    )
 
-  const newPair: boolean =
-    pair === null ||
-    (!!pair && JSBI.equal(pair.reserve0.raw, JSBI.BigInt(0)) && JSBI.equal(pair.reserve1.raw, JSBI.BigInt(0)))
-  const allowImport: boolean = position && JSBI.greaterThan(position.raw, JSBI.BigInt(0))
+  const position: TokenAmount | undefined = useTokenBalance(account ?? undefined, pair?.liquidityToken)
+  const hasPosition = Boolean(position && JSBI.greaterThan(position.raw, JSBI.BigInt(0)))
+
+  const handleCurrencySelect = useCallback(
+    (currency: Currency) => {
+      if (activeField === Fields.TOKEN0) {
+        setCurrency0(currency)
+      } else {
+        setCurrency1(currency)
+      }
+    },
+    [activeField]
+  )
+
+  const handleSearchDismiss = useCallback(() => {
+    setShowSearch(false)
+  }, [setShowSearch])
+
+  const prerequisiteMessage = (
+    <LightCard padding="45px 10px">
+      <Text textAlign="center">
+        {!account ? 'Connect to a wallet to find pools' : 'Select a token to find your liquidity.'}
+      </Text>
+    </LightCard>
+  )
 
   return (
     <AppBody>
+      <FindPoolTabs />
       <AutoColumn gap="md">
-        {!token0Address ? (
-          <ButtonDropwdown
-            onClick={() => {
-              setShowSearch(true)
-              setActiveField(Fields.TOKEN0)
-            }}
-          >
-            <Text fontSize={20}>Select first token</Text>
-          </ButtonDropwdown>
-        ) : (
-          <ButtonDropwdownLight
-            onClick={() => {
-              setShowSearch(true)
-              setActiveField(Fields.TOKEN0)
-            }}
-          >
+        <ButtonDropdownLight
+          onClick={() => {
+            setShowSearch(true)
+            setActiveField(Fields.TOKEN0)
+          }}
+        >
+          {currency0 ? (
             <Row>
-              <TokenLogo address={token0Address} />
+              <CurrencyLogo currency={currency0} />
               <Text fontWeight={500} fontSize={20} marginLeft={'12px'}>
-                {token0?.symbol}
+                {currency0.symbol}
               </Text>
             </Row>
-          </ButtonDropwdownLight>
-        )}
+          ) : (
+            <Text fontWeight={500} fontSize={20} marginLeft={'12px'}>
+              Select a Token
+            </Text>
+          )}
+        </ButtonDropdownLight>
+
         <ColumnCenter>
           <Plus size="16" color="#888D9B" />
         </ColumnCenter>
-        {!token1Address ? (
-          <ButtonDropwdown
-            onClick={() => {
-              setShowSearch(true)
-              setActiveField(Fields.TOKEN1)
-            }}
-          >
-            <Text fontSize={20}>Select second token</Text>
-          </ButtonDropwdown>
-        ) : (
-          <ButtonDropwdownLight
-            onClick={() => {
-              setShowSearch(true)
-              setActiveField(Fields.TOKEN1)
-            }}
-          >
+
+        <ButtonDropdownLight
+          onClick={() => {
+            setShowSearch(true)
+            setActiveField(Fields.TOKEN1)
+          }}
+        >
+          {currency1 ? (
             <Row>
-              <TokenLogo address={token1Address} />
+              <CurrencyLogo currency={currency1} />
               <Text fontWeight={500} fontSize={20} marginLeft={'12px'}>
-                {token1?.symbol}
+                {currency1.symbol}
               </Text>
             </Row>
-          </ButtonDropwdownLight>
-        )}
-        {allowImport && (
+          ) : (
+            <Text fontWeight={500} fontSize={20} marginLeft={'12px'}>
+              Select a Token
+            </Text>
+          )}
+        </ButtonDropdownLight>
+
+        {hasPosition && (
           <ColumnCenter
             style={{ justifyItems: 'center', backgroundColor: '', padding: '12px 0px', borderRadius: '12px' }}
           >
-            <Text textAlign="center" fontWeight={500} color="">
-              Pool Imported!
+            <Text textAlign="center" fontWeight={500}>
+              Pool Found!
             </Text>
           </ColumnCenter>
         )}
-        {position ? (
-          !JSBI.equal(position.raw, JSBI.BigInt(0)) ? (
-            <PositionCard pair={pair} minimal={true} border="1px solid #CED0D9" />
-          ) : (
+
+        {currency0 && currency1 ? (
+          pairState === PairState.EXISTS ? (
+            hasPosition && pair ? (
+              <MinimalPositionCard pair={pair} border="1px solid #CED0D9" />
+            ) : (
+              <LightCard padding="45px 10px">
+                <AutoColumn gap="sm" justify="center">
+                  <Text textAlign="center">You don’t have liquidity in this pool yet.</Text>
+                  <StyledInternalLink to={`/add/${currencyId(currency0)}/${currencyId(currency1)}`}>
+                    <Text textAlign="center">Add liquidity.</Text>
+                  </StyledInternalLink>
+                </AutoColumn>
+              </LightCard>
+            )
+          ) : validPairNoLiquidity ? (
             <LightCard padding="45px 10px">
               <AutoColumn gap="sm" justify="center">
-                <Text textAlign="center">Pool found, you don’t have liquidity on this pair yet.</Text>
-                <Link
-                  onClick={() => {
-                    history.push('/add/' + token0Address + '-' + token1Address)
-                  }}
-                >
-                  <Text textAlign="center">Add liquidity to this pair instead.</Text>
-                </Link>
+                <Text textAlign="center">No pool found.</Text>
+                <StyledInternalLink to={`/add/${currencyId(currency0)}/${currencyId(currency1)}`}>
+                  Create pool.
+                </StyledInternalLink>
               </AutoColumn>
             </LightCard>
-          )
-        ) : newPair ? (
-          <LightCard padding="45px">
-            <AutoColumn gap="sm" justify="center">
-              <Text color="">No pool found.</Text>
-              <Link
-                onClick={() => {
-                  history.push('/add/' + token0Address + '-' + token1Address)
-                }}
-              >
-                Create pool?
-              </Link>
-            </AutoColumn>
-          </LightCard>
+          ) : pairState === PairState.INVALID ? (
+            <LightCard padding="45px 10px">
+              <AutoColumn gap="sm" justify="center">
+                <Text textAlign="center" fontWeight={500}>
+                  Invalid pair.
+                </Text>
+              </AutoColumn>
+            </LightCard>
+          ) : pairState === PairState.LOADING ? (
+            <LightCard padding="45px 10px">
+              <AutoColumn gap="sm" justify="center">
+                <Text textAlign="center">
+                  Loading
+                  <Dots />
+                </Text>
+              </AutoColumn>
+            </LightCard>
+          ) : null
         ) : (
-          <LightCard padding={'45px'}>
-            <Text color="#C3C5CB" textAlign="center">
-              Select a token pair to find your liquidity.
-            </Text>
-          </LightCard>
+          prerequisiteMessage
         )}
-
-        <ButtonPrimary disabled={!allowImport} onClick={() => history.goBack()}>
-          <Text fontWeight={500} fontSize={20}>
-            Close
-          </Text>
-        </ButtonPrimary>
       </AutoColumn>
-      <SearchModal
+
+      <CurrencySearchModal
         isOpen={showSearch}
-        filterType="tokens"
-        onTokenSelect={address => {
-          activeField === Fields.TOKEN0 ? setToken0Address(address) : setToken1Address(address)
-        }}
-        onDismiss={() => {
-          setShowSearch(false)
-        }}
-        hiddenToken={activeField === Fields.TOKEN0 ? token1Address : token0Address}
+        onCurrencySelect={handleCurrencySelect}
+        onDismiss={handleSearchDismiss}
+        showCommonBases
+        selectedCurrency={(activeField === Fields.TOKEN0 ? currency1 : currency0) ?? undefined}
       />
     </AppBody>
   )

@@ -1,36 +1,40 @@
+import { INITIAL_ALLOWED_SLIPPAGE, DEFAULT_DEADLINE_FROM_NOW } from '../../constants'
 import { createReducer } from '@reduxjs/toolkit'
-import { ChainId, WETH } from '@uniswap/sdk-fork'
+import { updateVersion } from '../global/actions'
 import {
   addSerializedPair,
   addSerializedToken,
-  dismissTokenWarning,
   removeSerializedPair,
   removeSerializedToken,
   SerializedPair,
   SerializedToken,
   updateMatchesDarkMode,
   updateUserDarkMode,
-  updateVersion
+  updateUserExpertMode,
+  updateUserSlippageTolerance,
+  updateUserDeadline
 } from './actions'
 
 const currentTimestamp = () => new Date().getTime()
 
-interface UserState {
-  lastVersion: string
+export interface UserState {
+  // the timestamp of the last updateVersion action
+  lastUpdateVersionTimestamp?: number
 
   userDarkMode: boolean | null // the user's choice for dark mode or light mode
   matchesDarkMode: boolean // whether the dark mode media query matches
 
+  userExpertMode: boolean
+
+  // user defined slippage tolerance in bips, used in all txns
+  userSlippageTolerance: number
+
+  // deadline set by user in minutes, used in all txns
+  userDeadline: number
+
   tokens: {
     [chainId: number]: {
       [address: string]: SerializedToken
-    }
-  }
-
-  // the token warnings that the user has dismissed
-  dismissedTokenWarnings?: {
-    [chainId: number]: {
-      [tokenAddress: string]: true
     }
   }
 
@@ -48,35 +52,33 @@ function pairKey(token0Address: string, token1Address: string) {
   return `${token0Address};${token1Address}`
 }
 
-const initialState: UserState = {
-  lastVersion: '',
-
+export const initialState: UserState = {
   userDarkMode: null,
   matchesDarkMode: false,
-
+  userExpertMode: false,
+  userSlippageTolerance: INITIAL_ALLOWED_SLIPPAGE,
+  userDeadline: DEFAULT_DEADLINE_FROM_NOW,
   tokens: {},
   pairs: {},
-
   timestamp: currentTimestamp()
 }
-
-const GIT_COMMIT_HASH: string | undefined = process.env.REACT_APP_GIT_COMMIT_HASH
 
 export default createReducer(initialState, builder =>
   builder
     .addCase(updateVersion, state => {
-      if (GIT_COMMIT_HASH && state.lastVersion !== GIT_COMMIT_HASH) {
-        state.lastVersion = GIT_COMMIT_HASH
-
-        // Wed May 20, 2020 @ ~9pm central
-        if (state.timestamp < 1590027589111) {
-          // this should remove the user added token from 'eth' for mainnet
-          if (state.tokens[ChainId.MAINNET]) {
-            delete state.tokens[ChainId.MAINNET][WETH[ChainId.MAINNET].address]
-          }
-        }
+      // slippage isnt being tracked in local storage, reset to default
+      // noinspection SuspiciousTypeOfGuard
+      if (typeof state.userSlippageTolerance !== 'number') {
+        state.userSlippageTolerance = INITIAL_ALLOWED_SLIPPAGE
       }
-      state.timestamp = currentTimestamp()
+
+      // deadline isnt being tracked in local storage, reset to default
+      // noinspection SuspiciousTypeOfGuard
+      if (typeof state.userDeadline !== 'number') {
+        state.userDeadline = DEFAULT_DEADLINE_FROM_NOW
+      }
+
+      state.lastUpdateVersionTimestamp = currentTimestamp()
     })
     .addCase(updateUserDarkMode, (state, action) => {
       state.userDarkMode = action.payload.userDarkMode
@@ -84,6 +86,18 @@ export default createReducer(initialState, builder =>
     })
     .addCase(updateMatchesDarkMode, (state, action) => {
       state.matchesDarkMode = action.payload.matchesDarkMode
+      state.timestamp = currentTimestamp()
+    })
+    .addCase(updateUserExpertMode, (state, action) => {
+      state.userExpertMode = action.payload.userExpertMode
+      state.timestamp = currentTimestamp()
+    })
+    .addCase(updateUserSlippageTolerance, (state, action) => {
+      state.userSlippageTolerance = action.payload.userSlippageTolerance
+      state.timestamp = currentTimestamp()
+    })
+    .addCase(updateUserDeadline, (state, action) => {
+      state.userDeadline = action.payload.userDeadline
       state.timestamp = currentTimestamp()
     })
     .addCase(addSerializedToken, (state, { payload: { serializedToken } }) => {
@@ -95,11 +109,6 @@ export default createReducer(initialState, builder =>
       state.tokens[chainId] = state.tokens[chainId] || {}
       delete state.tokens[chainId][address]
       state.timestamp = currentTimestamp()
-    })
-    .addCase(dismissTokenWarning, (state, { payload: { chainId, tokenAddress } }) => {
-      state.dismissedTokenWarnings = state.dismissedTokenWarnings ?? {}
-      state.dismissedTokenWarnings[chainId] = state.dismissedTokenWarnings[chainId] ?? {}
-      state.dismissedTokenWarnings[chainId][tokenAddress] = true
     })
     .addCase(addSerializedPair, (state, { payload: { serializedPair } }) => {
       if (

@@ -1,22 +1,23 @@
-import * as React from 'react';
+import { ChainId } from '@uniswap/sdk'
+import React from 'react'
+import { isMobile } from 'react-device-detect'
+import { Text } from 'rebass'
 import { Link as HistoryLink } from 'react-router-dom';
 
-import styled from 'styled-components';
-import { useTokenBalanceTreatingWETHasETH } from '../../state/wallet/hooks';
-
-import Menu from '../Menu';
-import Row from '../Row';
-import Web3Status from '../Web3Status';
-
-import { ChainId, WETH } from '@uniswap/sdk-fork';
-import { isMobile } from 'react-device-detect';
-import { Text } from 'rebass';
-import { useActiveWeb3React } from '../../hooks';
-import { useDarkModeManager } from '../../state/user/hooks';
-import { YellowCard } from '../Card';
+import styled from 'styled-components'
 
 import Logo from '../../assets/svg/logo.webp';
-import { RowBetween } from '../Row';
+import { useActiveWeb3React } from '../../hooks'
+import { useDarkModeManager } from '../../state/user/hooks'
+import { useETHBalances } from '../../state/wallet/hooks'
+
+import { YellowCard } from '../Card'
+import Settings from '../Settings'
+import Menu from '../Menu'
+
+import Row, { RowBetween } from '../Row'
+import Web3Status from '../Web3Status'
+// import VersionSwitch from './VersionSwitch'
 
 const HeaderFrame = styled.div`
   display: flex;
@@ -26,15 +27,12 @@ const HeaderFrame = styled.div`
   width: 100%;
   top: 0;
   position: absolute;
-
-  pointer-events: none;
-
+  z-index: 2;
   ${({ theme }) => theme.mediaWidth.upToExtraSmall`
     padding: 12px 0 0 0;
     width: calc(100%);
     position: relative;
   `};
-  z-index: 2;
 `
 
 const HeaderElement = styled.div`
@@ -42,22 +40,25 @@ const HeaderElement = styled.div`
   align-items: center;
 `
 
-const Title = styled.div`
+const HeaderElementWrap = styled.div`
+  display: flex;
+  align-items: center;
+
+  ${({ theme }) => theme.mediaWidth.upToSmall`
+    margin-top: 0.5rem;
+`};
+`
+
+const Title = styled.a`
   display: flex;
   align-items: center;
   pointer-events: auto;
+  text-decoration: none;
+  text-decoration-style: unset;
 
   :hover {
     cursor: pointer;
   }
-`
-
-const TitleText = styled(Row)`
-  width: fit-content;
-  white-space: nowrap;
-  ${({ theme }) => theme.mediaWidth.upToExtraSmall`
-    display: none;
-  `};
 `
 
 const AccountElement = styled.div<{ active: boolean }>`
@@ -67,6 +68,7 @@ const AccountElement = styled.div<{ active: boolean }>`
   background-color: ${({ theme, active }) => (!active ? theme.bg1 : theme.bg3)};
   border-radius: 12px;
   white-space: nowrap;
+  width: 100%;
 
   :focus {
     border: 1px solid blue;
@@ -77,10 +79,7 @@ const TestnetWrapper = styled.div`
   white-space: nowrap;
   width: fit-content;
   margin-left: 10px;
-
-  ${({ theme }) => theme.mediaWidth.upToSmall`
-    display: none;
-  `};
+  pointer-events: auto;
 `
 
 const NetworkCard = styled(YellowCard)`
@@ -90,38 +89,64 @@ const NetworkCard = styled(YellowCard)`
   padding: 8px 12px;
 `
 
-const UniIcon = styled(HistoryLink) <{ to: string }>`
+const UniIcon = styled.div`
   transition: transform 0.3s ease;
   :hover {
     transform: rotate(-5deg);
   }
+  ${({ theme }) => theme.mediaWidth.upToSmall`
+    img { 
+      width: 4.5rem;
+    }
+  `};
 `
 
+const HeaderControls = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  ${({ theme }) => theme.mediaWidth.upToSmall`
+    flex-direction: column;
+    align-items: flex-end;
+  `};
+`
+
+const BalanceText = styled(Text)`
+  ${({ theme }) => theme.mediaWidth.upToExtraSmall`
+    display: none;
+  `};
+`
+const TitleText = styled(Row)`
+  width: fit-content;
+  white-space: nowrap;
+  ${({ theme }) => theme.mediaWidth.upToExtraSmall`
+    display: none;
+  `};
+`
+
+const NETWORK_LABELS: { [chainId in ChainId]: string | null } = {
+  [ChainId.MAINNET]: null,
+  [ChainId.RINKEBY]: 'Rinkeby',
+  [ChainId.ROPSTEN]: 'Ropsten',
+  [ChainId.GÖRLI]: 'Görli',
+  [ChainId.KOVAN]: 'Kovan',
+  [ChainId.LACHAIN]: 'LAChain Mainnet'
+}
 
 export default function Header() {
   const { account, chainId } = useActiveWeb3React()
 
-  const userEthBalance = useTokenBalanceTreatingWETHasETH(account, WETH[chainId])
+  const userEthBalance = useETHBalances(account ? [account] : [])?.[account ?? '']
   const [isDark] = useDarkModeManager()
 
   return (
     <HeaderFrame>
-      {/* <MigrateBanner>
-        Uniswap V2 is live! Read the&nbsp;
-        <Link href="https://uniswap.org/blog/launch-uniswap-v2/">
-          <b>blog post ↗</b>
-        </Link>
-        &nbsp;or&nbsp;
-        <Link href="https://migrate.uniswap.exchange/">
-          <b>migrate your liquidity ↗</b>
-        </Link>
-        .
-      </MigrateBanner> */}
-      <RowBetween padding="1rem">
+      <RowBetween style={{ alignItems: 'flex-start' }} padding="1rem 1rem 0 1rem">
         <HeaderElement>
-          <Title>
-            <UniIcon id="link" to="/">
-              <img src={Logo} alt="logo" width={60} style={{ borderRadius: '100%' }} />
+          <Title href=".">
+            <UniIcon>
+            <img src={Logo} alt="logo" width={60} style={{ borderRadius: '100%' }} />
             </UniIcon>
             {!isMobile && (
               <TitleText>
@@ -132,27 +157,27 @@ export default function Header() {
             )}
           </Title>
         </HeaderElement>
-        <HeaderElement>
-          <TestnetWrapper>
-            {!isMobile && chainId === ChainId.ROPSTEN && <NetworkCard>Ropsten</NetworkCard>}
-            {!isMobile && chainId === 418 as ChainId && <NetworkCard>LachainTestnet</NetworkCard>}
-            {!isMobile && chainId === ChainId.RINKEBY && <NetworkCard>Rinkeby</NetworkCard>}
-            {!isMobile && chainId === ChainId.GÖRLI && <NetworkCard>Görli</NetworkCard>}
-            {!isMobile && chainId === ChainId.KOVAN && <NetworkCard>Kovan</NetworkCard>}
-          </TestnetWrapper>
-          <AccountElement active={!!account} style={{ pointerEvents: 'auto' }}>
-            {account && userEthBalance ? (
-              <Text style={{ flexShrink: 0 }} px="0.5rem" fontWeight={500}>
-                {userEthBalance?.toSignificant(4)} LAC
-              </Text>
-            ) : null}
-            <Web3Status />
-          </AccountElement>
-          <div style={{ pointerEvents: 'auto' }}>
+        <HeaderControls>
+          <HeaderElement>
+            <TestnetWrapper>
+              {!isMobile && chainId && NETWORK_LABELS[chainId] && <NetworkCard>{NETWORK_LABELS[chainId]}</NetworkCard>}
+            </TestnetWrapper>
+            <AccountElement active={!!account} style={{ pointerEvents: 'auto' }}>
+              {account && userEthBalance ? (
+                <BalanceText style={{ flexShrink: 0 }} pl="0.75rem" pr="0.5rem" fontWeight={500}>
+                  {userEthBalance?.toSignificant(4)} LAC
+                </BalanceText>
+              ) : null}
+              <Web3Status />
+            </AccountElement>
+          </HeaderElement>
+          <HeaderElementWrap>
+            {/* <VersionSwitch /> */}
+            <Settings />
             <Menu />
-          </div>
-        </HeaderElement>
-      </RowBetween >
-    </HeaderFrame >
+          </HeaderElementWrap>
+        </HeaderControls>
+      </RowBetween>
+    </HeaderFrame>
   )
 }

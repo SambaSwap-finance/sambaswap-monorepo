@@ -1,10 +1,11 @@
-import React, { useRef, useEffect } from 'react'
-import { Info, BookOpen, Code, PieChart, MessageCircle } from 'react-feather'
+import React, { useRef } from 'react'
+import { Code, PieChart } from 'react-feather'
 import styled from 'styled-components'
 import { ReactComponent as MenuIcon } from '../../assets/images/menu.svg'
+import { useOnClickOutside } from '../../hooks/useOnClickOutside'
 import useToggle from '../../hooks/useToggle'
 
-import { Link } from '../../theme'
+import { ExternalLink } from '../../theme'
 
 const StyledMenuIcon = styled(MenuIcon)`
   path {
@@ -63,7 +64,7 @@ const MenuFlyout = styled.span`
   z-index: 100;
 `
 
-const MenuItem = styled(Link)`
+const MenuItem = styled(ExternalLink)`
   flex: 1;
   padding: 0.5rem 0.5rem;
   color: ${({ theme }) => theme.text2};
@@ -77,56 +78,38 @@ const MenuItem = styled(Link)`
   }
 `
 
-const CODE_LINK = !!process.env.REACT_APP_GIT_COMMIT_HASH
-  ? `https://github.com/Uniswap/uniswap-frontend/tree/${process.env.REACT_APP_GIT_COMMIT_HASH}`
-  : 'https://github.com/Uniswap/uniswap-frontend'
+const CODE_LINK = 'https://github.com/SambaSwap-finance/sambaswap-monorepo'
 
 export default function Menu() {
   const node = useRef<HTMLDivElement>()
   const [open, toggle] = useToggle(false)
 
-  useEffect(() => {
-    const handleClickOutside = e => {
-      if (node.current?.contains(e.target) ?? false) {
-        return
-      }
-      toggle()
-    }
-
-    if (open) {
-      document.addEventListener('mousedown', handleClickOutside)
-    } else {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [open, toggle])
+  useOnClickOutside(node, open ? toggle : undefined)
 
   return (
-    <StyledMenu ref={node}>
+    // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/30451
+    <StyledMenu ref={node as any}>
       <StyledMenuButton onClick={toggle}>
         <StyledMenuIcon />
       </StyledMenuButton>
       {open && (
         <MenuFlyout>
           {/* <MenuItem id="link" href="https://uniswap.org/">
-            <Info size={14} />
-            About
-          </MenuItem>
-          <MenuItem id="link" href="https://uniswap.org/docs/v2">
-            <BookOpen size={14} />
-            Docs
-          </MenuItem> */}
+          <Info size={14} />
+          About
+        </MenuItem>
+        <MenuItem id="link" href="https://uniswap.org/docs/v2">
+          <BookOpen size={14} />
+          Docs
+        </MenuItem> */}
           <MenuItem id="link" href={CODE_LINK}>
             <Code size={14} />
             Code
           </MenuItem>
           {/* <MenuItem id="link" href="https://discord.gg/vXCdddD">
-            <MessageCircle size={14} />
-            Discord
-          </MenuItem> */}
+          <MessageCircle size={14} />
+          Discord
+        </MenuItem> */}
           <MenuItem id="link" href="https://info.sambaswap.xyz/">
             <PieChart size={14} />
             Analytics

@@ -30,7 +30,8 @@ function isMethodArg(x: unknown): x is MethodArg {
 
 function isValidMethodArgs(x: unknown): x is MethodArgs | undefined {
   return (
-    x === undefined || (Array.isArray(x) && x.every(y => isMethodArg(y) || (Array.isArray(y) && y.every(isMethodArg))))
+    x === undefined ||
+    (Array.isArray(x) && x.every(xi => isMethodArg(xi) || (Array.isArray(xi) && xi.every(isMethodArg))))
   )
 }
 
@@ -67,7 +68,7 @@ function useCallsData(calls: (Call | undefined)[], options?: ListenerOptions): C
   // update listeners when there is an actual change that persists for at least 100ms
   useEffect(() => {
     const callKeys: string[] = JSON.parse(serializedCallKeys)
-    if (!chainId || callKeys.length === 0) return
+    if (!chainId || callKeys.length === 0) return undefined
     const calls = callKeys.map(key => parseCallKey(key))
     dispatch(
       addMulticallListeners({
@@ -121,22 +122,38 @@ const INVALID_CALL_STATE: CallState = { valid: false, result: undefined, loading
 const LOADING_CALL_STATE: CallState = { valid: true, result: undefined, loading: true, syncing: true, error: false }
 
 function toCallState(
-  result: CallResult | undefined,
+  callResult: CallResult | undefined,
   contractInterface: Interface | undefined,
   fragment: FunctionFragment | undefined,
   latestBlockNumber: number | undefined
 ): CallState {
-  if (!result) return INVALID_CALL_STATE
-  const { valid, data, blockNumber } = result
+  if (!callResult) return INVALID_CALL_STATE
+  const { valid, data, blockNumber } = callResult
   if (!valid) return INVALID_CALL_STATE
   if (valid && !blockNumber) return LOADING_CALL_STATE
   if (!contractInterface || !fragment || !latestBlockNumber) return LOADING_CALL_STATE
   const success = data && data.length > 2
+  const syncing = (blockNumber ?? 0) < latestBlockNumber
+  let result: Result | undefined = undefined
+  if (success && data) {
+    try {
+      result = contractInterface.decodeFunctionResult(fragment, data)
+    } catch (error) {
+      console.debug('Result data parsing failed', fragment, data)
+      return {
+        valid: true,
+        loading: false,
+        error: true,
+        syncing,
+        result
+      }
+    }
+  }
   return {
     valid: true,
     loading: false,
-    syncing: (blockNumber ?? 0) < latestBlockNumber,
-    result: success && data ? contractInterface.decodeFunctionResult(fragment, data) : undefined,
+    syncing,
+    result: result,
     error: !success
   }
 }

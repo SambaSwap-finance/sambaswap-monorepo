@@ -79,7 +79,7 @@ export default createReducer(initialState, builder =>
             fetchingBlockNumber
           }
         } else {
-          if (current.fetchingBlockNumber ?? 0 >= fetchingBlockNumber) return
+          if ((current.fetchingBlockNumber ?? 0) >= fetchingBlockNumber) return
           state.callResults[chainId][callKey].fetchingBlockNumber = fetchingBlockNumber
         }
       })
@@ -89,8 +89,12 @@ export default createReducer(initialState, builder =>
       calls.forEach(call => {
         const callKey = toCallKey(call)
         const current = state.callResults[chainId][callKey]
-        if (current && current.fetchingBlockNumber !== fetchingBlockNumber) return
-        delete current.fetchingBlockNumber
+        if (!current) return // only should be dispatched if we are already fetching
+        if (current.fetchingBlockNumber === fetchingBlockNumber) {
+          delete current.fetchingBlockNumber
+          current.data = null
+          current.blockNumber = fetchingBlockNumber
+        }
       })
     })
     .addCase(updateMulticallResults, (state, { payload: { chainId, results, blockNumber } }) => {

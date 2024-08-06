@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react'
 import { useActiveWeb3React } from '../../hooks'
-import { addPopup, PopupContent, removePopup, toggleWalletModal } from './actions'
+import { addPopup, PopupContent, removePopup, toggleWalletModal, toggleSettingsMenu } from './actions'
 import { useSelector, useDispatch } from 'react-redux'
 import { AppState } from '../index'
 
@@ -19,13 +19,22 @@ export function useWalletModalToggle(): () => void {
   return useCallback(() => dispatch(toggleWalletModal()), [dispatch])
 }
 
+export function useSettingsMenuOpen(): boolean {
+  return useSelector((state: AppState) => state.application.settingsMenuOpen)
+}
+
+export function useToggleSettingsMenu(): () => void {
+  const dispatch = useDispatch()
+  return useCallback(() => dispatch(toggleSettingsMenu()), [dispatch])
+}
+
 // returns a function that allows adding a popup
-export function useAddPopup(): (content: PopupContent) => void {
+export function useAddPopup(): (content: PopupContent, key?: string) => void {
   const dispatch = useDispatch()
 
   return useCallback(
-    (content: PopupContent) => {
-      dispatch(addPopup({ content }))
+    (content: PopupContent, key?: string) => {
+      dispatch(addPopup({ content, key }))
     },
     [dispatch]
   )

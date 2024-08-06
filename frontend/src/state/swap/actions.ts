@@ -5,7 +5,14 @@ export enum Field {
   OUTPUT = 'OUTPUT'
 }
 
-export const setDefaultsFromURLSearch = createAction<{ chainId: number; queryString?: string }>('setDefaultsFromURL')
-export const selectToken = createAction<{ field: Field; address: string }>('selectToken')
-export const switchTokens = createAction<void>('switchTokens')
-export const typeInput = createAction<{ field: Field; typedValue: string }>('typeInput')
+export const selectCurrency = createAction<{ field: Field; currencyId: string }>('swap/selectCurrency')
+export const switchCurrencies = createAction<void>('swap/switchCurrencies')
+export const typeInput = createAction<{ field: Field; typedValue: string }>('swap/typeInput')
+export const replaceSwapState = createAction<{
+  field: Field
+  typedValue: string
+  inputCurrencyId?: string
+  outputCurrencyId?: string
+  recipient: string | null
+}>('swap/replaceSwapState')
+export const setRecipient = createAction<{ recipient: string | null }>('swap/setRecipient')

@@ -3,7 +3,6 @@ import ReactGA from 'react-ga'
 import styled from 'styled-components'
 import { isMobile } from 'react-device-detect'
 import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core'
-import { URI_AVAILABLE } from '@web3-react/walletconnect-connector'
 import usePrevious from '../../hooks/usePrevious'
 import { useWalletModalOpen, useWalletModalToggle } from '../../state/application/hooks'
 
@@ -12,12 +11,15 @@ import AccountDetails from '../AccountDetails'
 import PendingView from './PendingView'
 import Option from './Option'
 import { SUPPORTED_WALLETS } from '../../constants'
-import { Link } from '../../theme'
+import { ExternalLink } from '../../theme'
 import MetamaskIcon from '../../assets/images/metamask.png'
 import { ReactComponent as Close } from '../../assets/images/x.svg'
-import { injected, walletconnect, fortmatic, portis } from '../../connectors'
+import { injected, fortmatic, portis } from '../../connectors'
 import { OVERLAY_READY } from '../../connectors/Fortmatic'
-import { ButtonLight } from '../Button'
+// import { WalletConnectConnector } from '@web3-react/walletconnect-connector'
+import WalletConnectIcon from '../../assets/images/walletConnectIcon.svg'
+import { AbstractConnector } from '@web3-react/abstract-connector'
+import { WalletConnectV2 } from '../../connectors/WalletConnectV2'
 
 const CloseIcon = styled.div`
   position: absolute;
@@ -129,7 +131,7 @@ export default function WalletModal({
 
   const [walletView, setWalletView] = useState(WALLET_VIEWS.ACCOUNT)
 
-  const [pendingWallet, setPendingWallet] = useState()
+  const [pendingWallet, setPendingWallet] = useState<AbstractConnector | undefined>()
 
   const [pendingError, setPendingError] = useState<boolean>()
 
@@ -153,19 +155,6 @@ export default function WalletModal({
     }
   }, [walletModalOpen])
 
-  // set up uri listener for walletconnect
-  const [uri, setUri] = useState()
-  useEffect(() => {
-    const activateWC = uri => {
-      setUri(uri)
-      // setWalletView(WALLET_VIEWS.PENDING)
-    }
-    walletconnect.on(URI_AVAILABLE, activateWC)
-    return () => {
-      walletconnect.off(URI_AVAILABLE, activateWC)
-    }
-  }, [])
-
   // close modal when a connection is successful
   const activePrevious = usePrevious(active)
   const connectorPrevious = usePrevious(connector)
@@ -175,7 +164,7 @@ export default function WalletModal({
     }
   }, [setWalletView, active, error, connector, walletModalOpen, activePrevious, connectorPrevious])
 
-  const tryActivation = async connector => {
+  const tryActivation = async (connector: AbstractConnector | undefined) => {
     let name = ''
     Object.keys(SUPPORTED_WALLETS).map(key => {
       if (connector === SUPPORTED_WALLETS[key].connector) {
@@ -191,13 +180,21 @@ export default function WalletModal({
     })
     setPendingWallet(connector) // set wallet for pending view
     setWalletView(WALLET_VIEWS.PENDING)
-    activate(connector, undefined, true).catch(error => {
-      if (error instanceof UnsupportedChainIdError) {
-        activate(connector) // a little janky...can't use setError because the connector isn't set
-      } else {
-        setPendingError(true)
-      }
-    })
+
+    // if the connector is walletconnect and the user has already tried to connect, manually reset the connector
+    // if (connector instanceof WalletConnectConnector && connector.walletConnectProvider?.wc?.uri) {
+    //   connector.walletConnectProvider = undefined
+    // }
+    console.log('connector', connector)
+    connector &&
+      activate(connector, undefined, true).catch(error => {
+        if (error instanceof UnsupportedChainIdError) {
+          
+          activate(connector) // a little janky...can't use setError because the connector isn't set
+        } else {
+          setPendingError(true)
+        }
+      })
   }
 
   // close wallet modal if fortmatic modal is active
@@ -223,6 +220,8 @@ export default function WalletModal({
           return (
             <Option
               onClick={() => {
+                console.log('option.connector', option.connector)
+                console.log('connector', connector)
                 option.connector !== connector && !option.href && tryActivation(option.connector)
               }}
               id={`connect-${key}`}
@@ -292,30 +291,29 @@ export default function WalletModal({
       )
     })
   }
-
   async function addLachainNetwork() {
-
     try {
-      const result = await (window.ethereum as any).request({
-        method: "wallet_addEthereumChain",
-        params: [{
-          chainId: "0x112",
-          rpcUrls: ["https://rpc1.mainnet.lachain.network"],
-          chainName: "Lachain Mainnet",
-          nativeCurrency: {
-            name: "LAC",
-            symbol: "LAC",
-            decimals: 18
-          },
-          blockExplorerUrls: ["https://explorer.lachain.network"]
-        }]
-      });
+      await (window.ethereum as any).request({
+        method: 'wallet_addEthereumChain',
+        params: [
+          {
+            chainId: '0x112',
+            rpcUrls: ['https://rpc1.mainnet.lachain.network'],
+            chainName: 'LaChain',
+            nativeCurrency: {
+              name: 'LAC',
+              symbol: 'LAC',
+              decimals: 18
+            },
+            blockExplorerUrls: ['https://explorer.lachain.network']
+          }
+        ]
+      })
     } catch (error) {
       console.log(error)
     }
   }
-
-
+  console.log(error)
   function getModalContent() {
     if (error) {
       return (
@@ -327,10 +325,16 @@ export default function WalletModal({
           <ContentWrapper>
             {error instanceof UnsupportedChainIdError ? (
               <>
-                <h5>Please connect to the appropriate LAChain network.</h5>
-                <ButtonLight onClick={addLachainNetwork}>
-                  Add LAChain Network to metamask
-                </ButtonLight>
+                <h5>Please connect to the appropriate LAChain Network.</h5>
+                <br />
+                <div className="flex cursor-pointer" onClick={addLachainNetwork}>
+                  <img
+                    width={'20px'}
+                    src="https://metamask.io/favicon-32x32.png?v=48400a28770e10dd52a8c0e539aeb282"
+                    style={{ marginRight: '8px' }}
+                  />{' '}
+                  Add LaChain
+                </div>
               </>
             ) : (
               'Error connecting. Try refreshing the page.'
@@ -374,22 +378,39 @@ export default function WalletModal({
         <ContentWrapper>
           {walletView === WALLET_VIEWS.PENDING ? (
             <PendingView
-              uri={uri}
-              size={220}
               connector={pendingWallet}
               error={pendingError}
               setPendingError={setPendingError}
               tryActivation={tryActivation}
             />
           ) : (
-            <OptionGrid>{getOptions()}</OptionGrid>
+            <OptionGrid>
+              {getOptions()}
+              <Option
+                onClick={async () => {
+                  const res = await eval('connectWalletConnect()')
+                  console.log({ res })
+                  if (res !== null) {
+                    const connector = new WalletConnectV2();
+                    tryActivation(connector);
+                  }
+                  // option.connector !== connector && !option.href && tryActivation(option.connector)
+                }}
+                id={`connect-walletconnect`}
+                key={`connect-walletconnect`}
+                active={false}
+                color={'#E8831D'}
+                link={null}
+                header={'WalletConnect'}
+                subheader={null}
+                icon={WalletConnectIcon}
+              />
+            </OptionGrid>
           )}
           {walletView !== WALLET_VIEWS.PENDING && (
             <Blurb>
               <span>New to Ethereum? &nbsp;</span>{' '}
-              <Link href="https://ethereum.org/use/#3-what-is-a-wallet-and-which-one-should-i-use">
-                Learn more about wallets
-              </Link>
+              <ExternalLink href="https://ethereum.org/wallets/">Learn more about wallets</ExternalLink>
             </Blurb>
           )}
         </ContentWrapper>
@@ -398,7 +419,7 @@ export default function WalletModal({
   }
 
   return (
-    <Modal isOpen={walletModalOpen} onDismiss={toggleWalletModal} minHeight={null} maxHeight={90}>
+    <Modal isOpen={walletModalOpen} onDismiss={toggleWalletModal} minHeight={false} maxHeight={90}>
       <Wrapper>{getModalContent()}</Wrapper>
     </Modal>
   )

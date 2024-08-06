@@ -3,11 +3,9 @@ import React from 'react'
 import styled from 'styled-components'
 import Option from './Option'
 import { SUPPORTED_WALLETS } from '../../constants'
-import WalletConnectData from './WalletConnectData'
-import { walletconnect, injected } from '../../connectors'
-import { Spinner } from '../../theme'
-import Circle from '../../assets/images/circle.svg'
+import { injected } from '../../connectors'
 import { darken } from 'polished'
+import Loader from '../Loader'
 
 const PendingSection = styled.div`
   ${({ theme }) => theme.flexColumnNoWrap};
@@ -19,14 +17,8 @@ const PendingSection = styled.div`
   }
 `
 
-const SpinnerWrapper = styled(Spinner)`
-  font-size: 4rem;
+const StyledLoader = styled(Loader)`
   margin-right: 1rem;
-  svg {
-    path {
-      color: ${({ theme }) => theme.bg4};
-    }
-  }
 `
 
 const LoadingMessage = styled.div<{ error?: boolean }>`
@@ -72,44 +64,39 @@ const LoadingWrapper = styled.div`
 `
 
 export default function PendingView({
-  uri = '',
-  size,
   connector,
   error = false,
   setPendingError,
   tryActivation
 }: {
-  uri?: string
-  size?: number
   connector?: AbstractConnector
   error?: boolean
   setPendingError: (error: boolean) => void
   tryActivation: (connector: AbstractConnector) => void
 }) {
-  const isMetamask = window.ethereum && window.ethereum.isMetaMask
+  const isMetamask = window?.ethereum?.isMetaMask
 
   return (
     <PendingSection>
-      {!error && connector === walletconnect && <WalletConnectData size={size} uri={uri} />}
       <LoadingMessage error={error}>
         <LoadingWrapper>
-          {!error && <SpinnerWrapper src={Circle} />}
           {error ? (
             <ErrorGroup>
               <div>Error connecting.</div>
               <ErrorButton
                 onClick={() => {
                   setPendingError(false)
-                  tryActivation(connector)
+                  connector && tryActivation(connector)
                 }}
               >
                 Try Again
               </ErrorButton>
             </ErrorGroup>
-          ) : connector === walletconnect ? (
-            'Scan QR code with a compatible wallet...'
           ) : (
-            'Initializing...'
+            <>
+              <StyledLoader />
+              Initializing...
+            </>
           )}
         </LoadingWrapper>
       </LoadingMessage>

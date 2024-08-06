@@ -1,3 +1,4 @@
+import { transparentize } from 'polished'
 import React, { useMemo } from 'react'
 import styled, {
   ThemeProvider as StyledComponentsThemeProvider,
@@ -20,7 +21,7 @@ const MEDIA_WIDTHS = {
 
 const mediaWidthTemplates: { [width in keyof typeof MEDIA_WIDTHS]: typeof css } = Object.keys(MEDIA_WIDTHS).reduce(
   (accumulator, size) => {
-    ; (accumulator as any)[size] = (a: any, b: any, c: any) => css`
+    ;(accumulator as any)[size] = (a: any, b: any, c: any) => css`
       @media (max-width: ${(MEDIA_WIDTHS as any)[size]}px) {
         ${css(a, b, c)}
       }
@@ -74,6 +75,7 @@ export function colors(darkMode: boolean): Colors {
 
     // other - Ensuring functional colors are clear and distinct
     red1: '#E63946', // Crisp red, suitable for alerts and warnings
+    red2: '#E63946', // Keeping the same red for consistency
     green1: '#00A550', // Pine green, for success and confirmation messages
     yellow1: '#FFD700', // Bright yellow, for attention and caution
     yellow2: '#FFC107' // Amber, for highlights and important buttons
@@ -116,7 +118,7 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
   return <StyledComponentsThemeProvider theme={themeObject}>{children}</StyledComponentsThemeProvider>
 }
 
-const TextWrapper = styled(Text) <{ color: keyof Colors }>`
+const TextWrapper = styled(Text)<{ color: keyof Colors }>`
   color: ${({ color, theme }) => (theme as any)[color]};
 `
 
@@ -163,29 +165,29 @@ export const TYPE = {
 }
 
 export const FixedGlobalStyle = createGlobalStyle`
-@import url('https://rsms.me/inter/inter.css');
-html { font-family: 'Inter', sans-serif; letter-spacing: -0.018em;}
+html, input, textarea, button {
+  font-family: 'Inter', sans-serif;
+  letter-spacing: -0.018em;
+  font-display: fallback;
+}
 @supports (font-variation-settings: normal) {
-  html { font-family: 'Inter var', sans-serif; }
+  html, input, textarea, button {
+    font-family: 'Inter var', sans-serif;
+  }
 }
 
 html,
 body {
   margin: 0;
   padding: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;    
 }
 
 * {
   box-sizing: border-box;
 }
 
-body > div {
-  height: 100%;
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
+button {
+  user-select: none;
 }
 
 html {
@@ -201,5 +203,13 @@ export const ThemedGlobalStyle = createGlobalStyle`
 html {
   color: ${({ theme }) => theme.text1};
   background-color: ${({ theme }) => theme.bg2};
+}
+
+body {
+  min-height: 100vh;
+  background-position: 0 -30vh;
+  background-repeat: no-repeat;
+  background-image: ${({ theme }) =>
+    `radial-gradient(50% 50% at 50% 50%, ${theme.primary5} 0%, ${transparentize(1, theme.primary4)} 100%)`};
 }
 `

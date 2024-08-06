@@ -1,71 +1,89 @@
-import { ChainId, JSBI, Pair, Percent, Route, Token, TokenAmount, Trade, TradeType, WETH } from '@uniswap/sdk-fork'
+import { AddressZero } from '@ethersproject/constants'
+import {
+  BigintIsh,
+  Currency,
+  CurrencyAmount,
+  currencyEquals,
+  ETHER,
+  JSBI,
+  Pair,
+  Percent,
+  Route,
+  Token,
+  TokenAmount,
+  Trade,
+  TradeType,
+  WETH
+} from '@uniswap/sdk'
 import { useMemo } from 'react'
 import { useActiveWeb3React } from '../hooks'
 import { useAllTokens } from '../hooks/Tokens'
 import { useV1FactoryContract } from '../hooks/useContract'
+import { Version } from '../hooks/useToggledVersion'
 import { NEVER_RELOAD, useSingleCallResult, useSingleContractMultipleData } from '../state/multicall/hooks'
 import { useETHBalances, useTokenBalance, useTokenBalances } from '../state/wallet/hooks'
 
-function useV1PairAddress(tokenAddress?: string): string | undefined {
+export function useV1ExchangeAddress(tokenAddress?: string): string | undefined {
   const contract = useV1FactoryContract()
 
   const inputs = useMemo(() => [tokenAddress], [tokenAddress])
   return useSingleCallResult(contract, 'getExchange', inputs)?.result?.[0]
 }
 
-class MockV1Pair extends Pair {
-  readonly isV1: true = true
+export class MockV1Pair extends Pair {
+  constructor(etherAmount: BigintIsh, tokenAmount: TokenAmount) {
+    super(tokenAmount, new TokenAmount(WETH[tokenAmount.token.chainId], etherAmount))
+  }
 }
 
-function useMockV1Pair(token?: Token): MockV1Pair | undefined {
-  const isWETH = token?.equals(WETH[token?.chainId])
+function useMockV1Pair(inputCurrency?: Currency): MockV1Pair | undefined {
+  const token = inputCurrency instanceof Token ? inputCurrency : undefined
 
-  // will only return an address on mainnet, and not for WETH
-  const v1PairAddress = useV1PairAddress(isWETH ? undefined : token?.address)
+  const isWETH = Boolean(token && token.equals(WETH[token.chainId]))
+  const v1PairAddress = useV1ExchangeAddress(isWETH ? undefined : token?.address)
   const tokenBalance = useTokenBalance(v1PairAddress, token)
   const ETHBalance = useETHBalances([v1PairAddress])[v1PairAddress ?? '']
 
-  return tokenBalance && ETHBalance && token
-    ? new MockV1Pair(tokenBalance, new TokenAmount(WETH[token.chainId], ETHBalance.toString()))
-    : undefined
-}
-
-// returns ALL v1 exchange addresses
-export function useAllV1ExchangeAddresses(): string[] {
-  const factory = useV1FactoryContract()
-  const exchangeCount = useSingleCallResult(factory, 'tokenCount')?.result
-
-  const parsedCount = parseInt(exchangeCount?.toString() ?? '0')
-
-  const indices = useMemo(() => [...Array(parsedCount).keys()].map(ix => [ix]), [parsedCount])
-  const data = useSingleContractMultipleData(factory, 'getTokenWithId', indices, NEVER_RELOAD)
-
-  return useMemo(() => data?.map(({ result }) => result?.[0])?.filter(x => x) ?? [], [data])
+  return useMemo(
+    () =>
+      token && tokenBalance && ETHBalance && inputCurrency ? new MockV1Pair(ETHBalance.raw, tokenBalance) : undefined,
+    [ETHBalance, inputCurrency, token, tokenBalance]
+  )
 }
 
 // returns all v1 exchange addresses in the user's token list
-export function useAllTokenV1ExchangeAddresses(): string[] {
+export function useAllTokenV1Exchanges(): { [exchangeAddress: string]: Token } {
   const allTokens = useAllTokens()
   const factory = useV1FactoryContract()
   const args = useMemo(() => Object.keys(allTokens).map(tokenAddress => [tokenAddress]), [allTokens])
 
   const data = useSingleContractMultipleData(factory, 'getExchange', args, NEVER_RELOAD)
 
-  return useMemo(() => data?.map(({ result }) => result?.[0])?.filter(x => x) ?? [], [data])
+  return useMemo(
+    () =>
+      data?.reduce<{ [exchangeAddress: string]: Token }>((memo, { result }, ix) => {
+        if (result?.[0] && result[0] !== AddressZero) {
+          memo[result[0]] = allTokens[args[ix][0]]
+        }
+        return memo
+      }, {}) ?? {},
+    [allTokens, args, data]
+  )
 }
 
 // returns whether any of the tokens in the user's token list have liquidity on v1
-export function useUserProbablyHasV1Liquidity(): boolean | undefined {
-  const exchangeAddresses = useAllTokenV1ExchangeAddresses()
-
+export function useUserHasLiquidityInAllTokens(): boolean | undefined {
   const { account, chainId } = useActiveWeb3React()
 
-  const fakeTokens = useMemo(
-    () => (chainId ? exchangeAddresses.map(address => new Token(chainId, address, 18, 'UNI-V1')) : []),
-    [chainId, exchangeAddresses]
+  const exchanges = useAllTokenV1Exchanges()
+
+  const v1ExchangeLiquidityTokens = useMemo(
+    () =>
+      chainId ? Object.keys(exchanges).map(address => new Token(chainId, address, 18, 'UNI-V1', 'Uniswap V1')) : [],
+    [chainId, exchanges]
   )
 
-  const balances = useTokenBalances(account ?? undefined, fakeTokens)
+  const balances = useTokenBalances(account ?? undefined, v1ExchangeLiquidityTokens)
 
   return useMemo(
     () =>
@@ -77,64 +95,93 @@ export function useUserProbablyHasV1Liquidity(): boolean | undefined {
   )
 }
 
-export function useV1TradeLinkIfBetter(
+/**
+ * Returns the trade to execute on V1 to go between input and output token
+ */
+export function useV1Trade(
   isExactIn?: boolean,
-  input?: Token,
-  output?: Token,
-  exactAmount?: TokenAmount,
-  v2Trade?: Trade,
-  minimumDelta: Percent = new Percent('0')
-): string | undefined {
-  const { chainId } = useActiveWeb3React()
-
-  const isMainnet: boolean = chainId === ChainId.MAINNET
-
+  inputCurrency?: Currency,
+  outputCurrency?: Currency,
+  exactAmount?: CurrencyAmount
+): Trade | undefined {
   // get the mock v1 pairs
-  const inputPair = useMockV1Pair(input)
-  const outputPair = useMockV1Pair(output)
+  const inputPair = useMockV1Pair(inputCurrency)
+  const outputPair = useMockV1Pair(outputCurrency)
 
-  const inputIsWETH = isMainnet && input?.equals(WETH[ChainId.MAINNET])
-  const outputIsWETH = isMainnet && output?.equals(WETH[ChainId.MAINNET])
+  const inputIsETH = inputCurrency === ETHER
+  const outputIsETH = outputCurrency === ETHER
 
   // construct a direct or through ETH v1 route
   let pairs: Pair[] = []
-  if (inputIsWETH && outputPair) {
+  if (inputIsETH && outputPair) {
     pairs = [outputPair]
-  } else if (outputIsWETH && inputPair) {
+  } else if (outputIsETH && inputPair) {
     pairs = [inputPair]
   }
-  // if neither are WETH, it's token-to-token (if they both exist)
+  // if neither are ETH, it's token-to-token (if they both exist)
   else if (inputPair && outputPair) {
     pairs = [inputPair, outputPair]
   }
 
-  const route = input && pairs && pairs.length > 0 && new Route(pairs, input)
+  const route = inputCurrency && pairs && pairs.length > 0 && new Route(pairs, inputCurrency, outputCurrency)
   let v1Trade: Trade | undefined
   try {
     v1Trade =
       route && exactAmount
         ? new Trade(route, exactAmount, isExactIn ? TradeType.EXACT_INPUT : TradeType.EXACT_OUTPUT)
         : undefined
-  } catch {}
+  } catch (error) {
+    console.debug('Failed to create V1 trade', error)
+  }
+  return v1Trade
+}
 
-  let v1HasBetterTrade = false
-  if (v1Trade) {
-    if (isExactIn) {
-      // discount the v1 output amount by minimumDelta
-      const discountedV1Output = v1Trade?.outputAmount.multiply(new Percent('1').subtract(minimumDelta))
-      // check if the discounted v1 amount is still greater than v2, short-circuiting if no v2 trade exists
-      v1HasBetterTrade = !v2Trade || discountedV1Output.greaterThan(v2Trade.outputAmount)
-    } else {
-      // inflate the v1 amount by minimumDelta
-      const inflatedV1Input = v1Trade?.inputAmount.multiply(new Percent('1').add(minimumDelta))
-      // check if the inflated v1 amount is still less than v2, short-circuiting if no v2 trade exists
-      v1HasBetterTrade = !v2Trade || inflatedV1Input.lessThan(v2Trade.inputAmount)
-    }
+export function getTradeVersion(trade?: Trade): Version | undefined {
+  const isV1 = trade?.route?.pairs?.some(pair => pair instanceof MockV1Pair)
+  if (isV1) return Version.v1
+  if (isV1 === false) return Version.v2
+  return undefined
+}
+
+// returns the v1 exchange against which a trade should be executed
+export function useV1TradeExchangeAddress(trade: Trade | undefined): string | undefined {
+  const tokenAddress: string | undefined = useMemo(() => {
+    if (!trade) return undefined
+    const isV1 = getTradeVersion(trade) === Version.v1
+    if (!isV1) return undefined
+    return trade.inputAmount instanceof TokenAmount
+      ? trade.inputAmount.token.address
+      : trade.outputAmount instanceof TokenAmount
+      ? trade.outputAmount.token.address
+      : undefined
+  }, [trade])
+  return useV1ExchangeAddress(tokenAddress)
+}
+
+const ZERO_PERCENT = new Percent('0')
+const ONE_HUNDRED_PERCENT = new Percent('1')
+
+// returns whether tradeB is better than tradeA by at least a threshold percentage amount
+export function isTradeBetter(
+  tradeA: Trade | undefined,
+  tradeB: Trade | undefined,
+  minimumDelta: Percent = ZERO_PERCENT
+): boolean | undefined {
+  if (tradeA && !tradeB) return false
+  if (tradeB && !tradeA) return true
+  if (!tradeA || !tradeB) return undefined
+
+  if (
+    tradeA.tradeType !== tradeB.tradeType ||
+    !currencyEquals(tradeA.inputAmount.currency, tradeB.inputAmount.currency) ||
+    !currencyEquals(tradeB.outputAmount.currency, tradeB.outputAmount.currency)
+  ) {
+    throw new Error('Trades are not comparable')
   }
 
-  return v1HasBetterTrade && input && output
-    ? `https://v1.uniswap.exchange/swap?inputCurrency=${inputIsWETH ? 'ETH' : input.address}&outputCurrency=${
-        outputIsWETH ? 'ETH' : output.address
-      }`
-    : undefined
+  if (minimumDelta.equalTo(ZERO_PERCENT)) {
+    return tradeA.executionPrice.lessThan(tradeB.executionPrice)
+  } else {
+    return tradeA.executionPrice.raw.multiply(minimumDelta.add(ONE_HUNDRED_PERCENT)).lessThan(tradeB.executionPrice)
+  }
 }

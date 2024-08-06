@@ -1,28 +1,33 @@
 import React, { Suspense } from 'react'
-import { BrowserRouter, HashRouter, Route, Switch } from 'react-router-dom'
+import { HashRouter, Route, Switch } from 'react-router-dom'
 import styled from 'styled-components'
-import Footer from '../components/Footer'
+import GoogleAnalyticsReporter from '../components/analytics/GoogleAnalyticsReporter'
 import Header from '../components/Header'
 import Popups from '../components/Popups'
 import Web3ReactManager from '../components/Web3ReactManager'
-import GoogleAnalyticsReporter from '../components/analytics/GoogleAnalyticsReporter'
 import DarkModeQueryParamReader from '../theme/DarkModeQueryParamReader'
 import AddLiquidity from './AddLiquidity'
-import CreatePool from './CreatePool'
+import {
+  RedirectDuplicateTokenIds,
+  RedirectOldAddLiquidityPathStructure,
+  RedirectToAddLiquidity
+} from './AddLiquidity/redirects'
+import MigrateV1 from './MigrateV1'
+import MigrateV1Exchange from './MigrateV1/MigrateV1Exchange'
+import RemoveV1Exchange from './MigrateV1/RemoveV1Exchange'
 import Pool from './Pool'
 import PoolFinder from './PoolFinder'
 import RemoveLiquidity from './RemoveLiquidity'
-import Send from './Send'
+import { RedirectOldRemoveLiquidityPathStructure } from './RemoveLiquidity/redirects'
 import Swap from './Swap'
 import { RedirectPathToSwapOnly, RedirectToSwap } from './Swap/redirects'
-
+import Footer from '../components/Footer'
 
 const AppWrapper = styled.div`
   display: flex;
   flex-flow: column;
   align-items: flex-start;
   overflow-x: hidden;
-  height: 100vh;
 `
 
 const HeaderWrapper = styled.div`
@@ -49,46 +54,14 @@ const BodyWrapper = styled.div`
   z-index: 1;
 `
 
-const BackgroundGradient = styled.div`
-  width: 100%;
-  height: 200vh;
-  background: ${({ theme }) => `radial-gradient(50% 50% at 50% 50%, ${theme.primary1} 0%, ${theme.bg1} 100%)`};
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  opacity: 0.1;
-  z-index: -1;
-
-  transform: translateY(-70vh);
-
-  @media (max-width: 960px) {
-    height: 300px;
-    width: 100%;
-    transform: translateY(-150px);
-  }
-`
-
 const Marginer = styled.div`
   margin-top: 5rem;
 `
 
-let Router: React.ComponentType
-if (process.env.PUBLIC_URL === '.') {
-  Router = HashRouter
-} else {
-  Router = BrowserRouter
-}
-
 export default function App() {
-
-  // const chart = new UniswapTradingview({ dex: Dex.LACHAIN });
-  // const pairAddress = '0x7b9d569f2be66280d14cef814c8e230e3e51393d';
-  // React.useEffect(() => {
-  //   chart.createChart('uniswap_tradingview_chart', { width: 1000, height: 500 }, pairAddress, '1d', 'CANDLE');
-  // }, []);
   return (
     <Suspense fallback={null}>
-      <Router>
+      <HashRouter>
         <Route component={GoogleAnalyticsReporter} />
         <Route component={DarkModeQueryParamReader} />
         <AppWrapper>
@@ -101,23 +74,26 @@ export default function App() {
               <Switch>
                 <Route exact strict path="/swap" component={Swap} />
                 <Route exact strict path="/swap/:outputCurrency" component={RedirectToSwap} />
-                <Route exact strict path="/send" component={Send} />
+                <Route exact strict path="/send" component={RedirectPathToSwapOnly} />
                 <Route exact strict path="/find" component={PoolFinder} />
                 <Route exact strict path="/pool" component={Pool} />
-                <Route exact strict path="/create" component={CreatePool} />
-                <Route exact strict path="/add/:tokens" component={AddLiquidity} />
-                <Route exact strict path="/remove/:tokens" component={RemoveLiquidity} />
+                <Route exact strict path="/create" component={RedirectToAddLiquidity} />
+                <Route exact path="/add" component={AddLiquidity} />
+                <Route exact path="/add/:currencyIdA" component={RedirectOldAddLiquidityPathStructure} />
+                <Route exact path="/add/:currencyIdA/:currencyIdB" component={RedirectDuplicateTokenIds} />
+                <Route exact strict path="/remove/v1/:address" component={RemoveV1Exchange} />
+                <Route exact strict path="/remove/:tokens" component={RedirectOldRemoveLiquidityPathStructure} />
+                <Route exact strict path="/remove/:currencyIdA/:currencyIdB" component={RemoveLiquidity} />
+                <Route exact strict path="/migrate/v1" component={MigrateV1} />
+                <Route exact strict path="/migrate/v1/:address" component={MigrateV1Exchange} />
                 <Route component={RedirectPathToSwapOnly} />
               </Switch>
             </Web3ReactManager>
             <Marginer />
-            {/* <div id="uniswap_tradingview_chart"></div> */}
             <Footer />
           </BodyWrapper>
-          <BackgroundGradient />
         </AppWrapper>
-      </Router>
-      <div id="popover-container" />
+      </HashRouter>
     </Suspense>
   )
 }

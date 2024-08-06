@@ -1,80 +1,111 @@
+import { Currency, CurrencyAmount, Pair, Token, Trade } from '@uniswap/sdk'
+import flatMap from 'lodash.flatmap'
 import { useMemo } from 'react'
-import { WETH, Token, TokenAmount, Trade, ChainId, Pair } from '@uniswap/sdk-fork'
-import { useActiveWeb3React } from './index'
-import { usePair } from '../data/Reserves'
 
-const DAI = new Token(ChainId.MAINNET, '0x6B175474E89094C44Da98b954EedeAC495271d0F', 18, 'DAI', 'Dai Stablecoin')
-const USDC = new Token(ChainId.MAINNET, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 6, 'USDC', 'USD//C')
-function useAllCommonPairs(tokenA?: Token, tokenB?: Token): Pair[] {
+import { BASES_TO_CHECK_TRADES_AGAINST, CUSTOM_BASES } from '../constants'
+import { PairState, usePairs } from '../data/Reserves'
+import { wrappedCurrency } from '../utils/wrappedCurrency'
+
+import { useActiveWeb3React } from './index'
+
+function useAllCommonPairs(currencyA?: Currency, currencyB?: Currency): Pair[] {
   const { chainId } = useActiveWeb3React()
 
-  // check for direct pair between tokens
-  const pairBetween = usePair(tokenA, tokenB)
+  const bases: Token[] = chainId ? BASES_TO_CHECK_TRADES_AGAINST[chainId] : []
 
-  // get token<->WETH pairs
-  const aToETH = usePair(tokenA, WETH[chainId as ChainId])
-  const bToETH = usePair(tokenB, WETH[chainId as ChainId])
+  const [tokenA, tokenB] = chainId
+    ? [wrappedCurrency(currencyA, chainId), wrappedCurrency(currencyB, chainId)]
+    : [undefined, undefined]
 
-  // get token<->DAI pairs
-  const aToDAI = usePair(tokenA, chainId === ChainId.MAINNET ? DAI : undefined)
-  const bToDAI = usePair(tokenB, chainId === ChainId.MAINNET ? DAI : undefined)
-
-  // get token<->USDC pairs
-  const aToUSDC = usePair(tokenA, chainId === ChainId.MAINNET ? USDC : undefined)
-  const bToUSDC = usePair(tokenB, chainId === ChainId.MAINNET ? USDC : undefined)
-
-  // get connecting pairs
-  const DAIToETH = usePair(chainId === ChainId.MAINNET ? DAI : undefined, WETH[chainId as ChainId])
-  const USDCToETH = usePair(chainId === ChainId.MAINNET ? USDC : undefined, WETH[chainId as ChainId])
-  const DAIToUSDC = usePair(
-    chainId === ChainId.MAINNET ? DAI : undefined,
-    chainId === ChainId.MAINNET ? USDC : undefined
+  const basePairs: [Token, Token][] = useMemo(
+    () =>
+      flatMap(bases, (base): [Token, Token][] => bases.map(otherBase => [base, otherBase])).filter(
+        ([t0, t1]) => t0.address !== t1.address
+      ),
+    [bases]
   )
+
+  const allPairCombinations: [Token, Token][] = useMemo(
+    () =>
+      tokenA && tokenB
+        ? [
+            // the direct pair
+            [tokenA, tokenB],
+            // token A against all bases
+            ...bases.map((base): [Token, Token] => [tokenA, base]),
+            // token B against all bases
+            ...bases.map((base): [Token, Token] => [tokenB, base]),
+            // each base against all bases
+            ...basePairs
+          ]
+            .filter((tokens): tokens is [Token, Token] => Boolean(tokens[0] && tokens[1]))
+            .filter(([t0, t1]) => t0.address !== t1.address)
+            .filter(([tokenA, tokenB]) => {
+              if (!chainId) return true
+              const customBases = CUSTOM_BASES[chainId]
+              if (!customBases) return true
+
+              const customBasesA: Token[] | undefined = customBases[tokenA.address]
+              const customBasesB: Token[] | undefined = customBases[tokenB.address]
+
+              if (!customBasesA && !customBasesB) return true
+
+              if (customBasesA && !customBasesA.find(base => tokenB.equals(base))) return false
+              if (customBasesB && !customBasesB.find(base => tokenA.equals(base))) return false
+
+              return true
+            })
+        : [],
+    [tokenA, tokenB, bases, basePairs, chainId]
+  )
+
+  const allPairs = usePairs(allPairCombinations)
 
   // only pass along valid pairs, non-duplicated pairs
   return useMemo(
     () =>
-      [pairBetween, aToETH, bToETH, aToDAI, bToDAI, aToUSDC, bToUSDC, DAIToETH, USDCToETH, DAIToUSDC]
-        // filter out invalid pairs
-        .filter((p): p is Pair => !!p)
-        // filter out duplicated pairs
-        .filter(
-          (p, i, pairs) => i === pairs.findIndex(pair => pair?.liquidityToken.address === p.liquidityToken.address)
-        ),
-    [pairBetween, aToETH, bToETH, aToDAI, bToDAI, aToUSDC, bToUSDC, DAIToETH, USDCToETH, DAIToUSDC]
+      Object.values(
+        allPairs
+          // filter out invalid pairs
+          .filter((result): result is [PairState.EXISTS, Pair] => Boolean(result[0] === PairState.EXISTS && result[1]))
+          // filter out duplicated pairs
+          .reduce<{ [pairAddress: string]: Pair }>((memo, [, curr]) => {
+            memo[curr.liquidityToken.address] = memo[curr.liquidityToken.address] ?? curr
+            return memo
+          }, {})
+      ),
+    [allPairs]
   )
 }
 
 /**
  * Returns the best trade for the exact amount of tokens in to the given token out
  */
-export function useTradeExactIn(amountIn?: TokenAmount, tokenOut?: Token): Trade | null {
-  const inputToken = amountIn?.token
-  const outputToken = tokenOut
-
-  const allowedPairs = useAllCommonPairs(inputToken, outputToken)
-
+export function useTradeExactIn(currencyAmountIn?: CurrencyAmount, currencyOut?: Currency): Trade | null {
+  const allowedPairs = useAllCommonPairs(currencyAmountIn?.currency, currencyOut)
   return useMemo(() => {
-    if (amountIn && tokenOut && allowedPairs.length > 0) {
-      return Trade.bestTradeExactIn(allowedPairs, amountIn, tokenOut)[0] ?? null
+    if (currencyAmountIn && currencyOut && allowedPairs.length > 0) {
+      return (
+        Trade.bestTradeExactIn(allowedPairs, currencyAmountIn, currencyOut, { maxHops: 3, maxNumResults: 1 })[0] ?? null
+      )
     }
     return null
-  }, [allowedPairs, amountIn, tokenOut])
+  }, [allowedPairs, currencyAmountIn, currencyOut])
 }
 
 /**
  * Returns the best trade for the token in to the exact amount of token out
  */
-export function useTradeExactOut(tokenIn?: Token, amountOut?: TokenAmount): Trade | null {
-  const inputToken = tokenIn
-  const outputToken = amountOut?.token
-
-  const allowedPairs = useAllCommonPairs(inputToken, outputToken)
+export function useTradeExactOut(currencyIn?: Currency, currencyAmountOut?: CurrencyAmount): Trade | null {
+  const allowedPairs = useAllCommonPairs(currencyIn, currencyAmountOut?.currency)
 
   return useMemo(() => {
-    if (tokenIn && amountOut && allowedPairs.length > 0) {
-      return Trade.bestTradeExactOut(allowedPairs, tokenIn, amountOut)[0] ?? null
+    if (currencyIn && currencyAmountOut && allowedPairs.length > 0) {
+      return (
+        Trade.bestTradeExactOut(allowedPairs, currencyIn, currencyAmountOut, { maxHops: 3, maxNumResults: 1 })[0] ??
+        null
+      )
     }
     return null
-  }, [allowedPairs, tokenIn, amountOut])
+  }, [allowedPairs, currencyIn, currencyAmountOut])
 }

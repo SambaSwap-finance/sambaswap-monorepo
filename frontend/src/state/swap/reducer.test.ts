@@ -1,6 +1,5 @@
-import { ChainId, WETH } from '@uniswap/sdk-fork'
 import { createStore, Store } from 'redux'
-import { Field, setDefaultsFromURLSearch } from './actions'
+import { Field, selectCurrency } from './actions'
 import reducer, { SwapState } from './reducer'
 
 describe('swap reducer', () => {
@@ -8,60 +7,29 @@ describe('swap reducer', () => {
 
   beforeEach(() => {
     store = createStore(reducer, {
-      [Field.OUTPUT]: { address: '' },
-      [Field.INPUT]: { address: '' },
+      [Field.OUTPUT]: { currencyId: '' },
+      [Field.INPUT]: { currencyId: '' },
       typedValue: '',
-      independentField: Field.INPUT
+      independentField: Field.INPUT,
+      recipient: null
     })
   })
 
-  describe('setDefaultsFromURL', () => {
-    test('ETH to DAI', () => {
+  describe('selectToken', () => {
+    it('changes token', () => {
       store.dispatch(
-        setDefaultsFromURLSearch({
-          chainId: ChainId.MAINNET,
-          queryString:
-            '?inputCurrency=ETH&outputCurrency=0x6b175474e89094c44da98b954eedeac495271d0f&exactAmount=20.5&exactField=outPUT'
+        selectCurrency({
+          field: Field.OUTPUT,
+          currencyId: '0x0000'
         })
       )
 
       expect(store.getState()).toEqual({
-        [Field.OUTPUT]: { address: '0x6B175474E89094C44Da98b954EedeAC495271d0F' },
-        [Field.INPUT]: { address: WETH[ChainId.MAINNET].address },
-        typedValue: '20.5',
-        independentField: Field.OUTPUT
-      })
-    })
-
-    test('does not duplicate eth for invalid output token', () => {
-      store.dispatch(
-        setDefaultsFromURLSearch({
-          chainId: ChainId.MAINNET,
-          queryString: '?outputCurrency=invalid'
-        })
-      )
-
-      expect(store.getState()).toEqual({
-        [Field.INPUT]: { address: '' },
-        [Field.OUTPUT]: { address: WETH[ChainId.MAINNET].address },
+        [Field.OUTPUT]: { currencyId: '0x0000' },
+        [Field.INPUT]: { currencyId: '' },
         typedValue: '',
-        independentField: Field.INPUT
-      })
-    })
-
-    test('output ETH only', () => {
-      store.dispatch(
-        setDefaultsFromURLSearch({
-          chainId: ChainId.MAINNET,
-          queryString: '?outputCurrency=eth&exactAmount=20.5'
-        })
-      )
-
-      expect(store.getState()).toEqual({
-        [Field.OUTPUT]: { address: WETH[ChainId.MAINNET].address },
-        [Field.INPUT]: { address: '' },
-        typedValue: '20.5',
-        independentField: Field.INPUT
+        independentField: Field.INPUT,
+        recipient: null
       })
     })
   })

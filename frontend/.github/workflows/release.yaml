@@ -2,14 +2,10 @@ name: Release
 on:
   # every morning
   schedule:
-    - cron:  '0 12 * * *'
+    - cron:  '0 12 * * 1-4'
 
-  # releases are triggered on changes to this file
-  push:
-    branches:
-      - v2
-    paths:
-      - '.github/workflows/release.yaml'
+  # manual trigger
+  workflow_dispatch:
 
 jobs:
   bump_version:
@@ -43,14 +39,14 @@ jobs:
           node-version: '12'
 
       - name: Install dependencies
-        run: yarn install --ignore-scripts --frozen-lockfile
+        run: yarn install --frozen-lockfile
 
       - name: Build the IPFS bundle
-        run: yarn ipfs-build
+        run: yarn build
 
       - name: Pin to IPFS
         id: upload
-        uses: anantaramdas/ipfs-pinata-deploy-action@v1.5.2
+        uses: anantaramdas/ipfs-pinata-deploy-action@39bbda1ce1fe24c69c6f57861b8038278d53688d
         with:
           pin-name: Uniswap ${{ needs.bump_version.outputs.new_tag }}
           path: './build'
@@ -64,14 +60,14 @@ jobs:
           cidv0: ${{ steps.upload.outputs.hash }}
 
       - name: Update DNS with new IPFS hash
-        uses: uniswap/replace-vercel-dns-records@v1.0.0
+        env:
+          CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
+          RECORD_DOMAIN: 'uniswap.org'
+          RECORD_NAME: '_dnslink.app'
+          CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+        uses: textileio/cloudflare-update-dnslink@0fe7b7a1ffc865db3a4da9773f0f987447ad5848
         with:
-          domain: 'uniswap.org'
-          subdomain: '_dnslink.app'
-          record-type: 'TXT'
-          value: dnslink=/ipfs/${{ steps.upload.outputs.hash }}
-          token: ${{ secrets.VERCEL_TOKEN }}
-          team-name: 'uniswap'
+          cid: ${{ steps.upload.outputs.hash }}
 
       - name: Create GitHub Release
         id: create_release
@@ -82,19 +78,21 @@ jobs:
           tag_name: ${{ needs.bump_version.outputs.new_tag }}
           release_name: Release ${{ needs.bump_version.outputs.new_tag }}
           body: |
-            Release built from commit [`${{ github.sha }}`](https://github.com/Uniswap/uniswap-frontend/tree/${{ github.sha }})
-
-            The IPFS hash of the bundle is:
+            IPFS hash of the deployment:
             - CIDv0: `${{ steps.upload.outputs.hash }}`
             - CIDv1: `${{ steps.convert_cidv0.outputs.cidv1 }}`
 
-            Uniswap uses [`localStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) to store your settings.
-            **Beware** that other sites you access via the _same_ IPFS gateway can read and modify your settings on Uniswap without your permission.
-            You can avoid this issue by using a subdomain IPFS gateway. The preferred gateway URLs below utilize the CIDv1 of the release in the subdomain, and are relatively safer.
+            The latest release is always accessible via our alias to the Cloudflare IPFS gateway at [app.uniswap.org](https://app.uniswap.org).
+
+            You can also access the Uniswap Interface directly from an IPFS gateway.
+            The Uniswap interface uses [`localStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) to store your settings.
+            **Beware** that other sites you access via the _same_ IPFS gateway can read and modify your settings on the Uniswap interface without your permission.
+            You can avoid this issue by using a subdomain IPFS gateway, or our alias to the latest release at [app.uniswap.org](https://app.uniswap.org).
+            The preferred URLs below are safe to use to access this specific release.
 
             Preferred URLs:
             - https://${{ steps.convert_cidv0.outputs.cidv1 }}.ipfs.dweb.link/
-            - https://${{ steps.convert_cidv0.outputs.cidv1 }}.cf-ipfs.com/
+            - https://${{ steps.convert_cidv0.outputs.cidv1 }}.ipfs.cf-ipfs.com/
             - [ipfs://${{ steps.upload.outputs.hash }}/](ipfs://${{ steps.upload.outputs.hash }}/)
 
             Other IPFS gateways:
